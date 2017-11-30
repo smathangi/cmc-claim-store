@@ -50,7 +50,7 @@ public class FullDefenceResponseData extends ResponseData {
         }
 
         final FullDefenceResponseData that = (FullDefenceResponseData) other;
-        return Objects.equals(defence, that.defence);
+        return super.equals(that) && Objects.equals(defence, that.defence);
     }
 
     @Override

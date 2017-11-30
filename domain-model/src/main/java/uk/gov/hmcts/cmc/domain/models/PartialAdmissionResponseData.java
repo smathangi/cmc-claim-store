@@ -1,7 +1,9 @@
 package uk.gov.hmcts.cmc.domain.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
@@ -41,11 +43,18 @@ public class PartialAdmissionResponseData extends ResponseData {
     @Size(max = 99000)
     private final String impactOfDispute;
 
-    public PartialAdmissionResponseData(FreeMediationOption freeMediation,
-                                        MoreTimeNeededOption moreTimeNeeded, Party defendant,
-                                        StatementOfTruth statementOfTruth, Evidence evidence,
-                                        HowMuchOwed howMuchOwed, Timeline timeline,
-                                        DefendantPaymentPlan defendantPaymentPlan, String impactOfDispute) {
+    @JsonCreator
+    public PartialAdmissionResponseData(
+        @JsonProperty("freeMediation") FreeMediationOption freeMediation,
+        @JsonProperty("moreTimeNeeded") MoreTimeNeededOption moreTimeNeeded,
+        @JsonProperty("defendant") Party defendant,
+        @JsonProperty("statementOfTruth") StatementOfTruth statementOfTruth,
+        @JsonProperty("evidence") Evidence evidence,
+        @JsonProperty("howMuchOwed") HowMuchOwed howMuchOwed,
+        @JsonProperty("timeline") Timeline timeline,
+        @JsonProperty("defendantPaymentPlan") DefendantPaymentPlan defendantPaymentPlan,
+        @JsonProperty("impactOfDispute") String impactOfDispute)
+    {
         super(freeMediation, moreTimeNeeded, defendant, statementOfTruth);
         this.evidence = evidence;
         this.howMuchOwed = howMuchOwed;
@@ -71,7 +80,8 @@ public class PartialAdmissionResponseData extends ResponseData {
         }
 
         final PartialAdmissionResponseData that = (PartialAdmissionResponseData) other;
-        return Objects.equals(evidence, that.evidence)
+        return super.equals(that)
+            && Objects.equals(evidence, that.evidence)
             && Objects.equals(howMuchOwed, that.howMuchOwed)
             && Objects.equals(timeline, that.timeline)
             && Objects.equals(defendantPaymentPlan, that.defendantPaymentPlan);

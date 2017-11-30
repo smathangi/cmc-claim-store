@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
 import uk.gov.hmcts.cmc.domain.models.party.Party;
 
+import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -63,6 +64,29 @@ public class ResponseData {
         this.moreTimeNeeded = moreTimeNeeded;
         this.defendant = defendant;
         this.statementOfTruth = statementOfTruth;
+    }
+
+    @Override
+    @SuppressWarnings("squid:S1067") // Its generated code for equals sonar
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+
+        final ResponseData that = (ResponseData) other;
+        return Objects.equals(freeMediation, that.freeMediation)
+            && Objects.equals(moreTimeNeeded, that.moreTimeNeeded)
+            && Objects.equals(defendant, that.defendant)
+            && Objects.equals(statementOfTruth, that.statementOfTruth);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(freeMediation, moreTimeNeeded, defendant);
     }
 
 
