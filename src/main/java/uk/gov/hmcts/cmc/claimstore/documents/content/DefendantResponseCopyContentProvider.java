@@ -34,7 +34,7 @@ public class DefendantResponseCopyContentProvider {
             defendantResponse,
             claim.getDefendantEmail()
         ));
-        content.put("responseDefence", defendantResponse.getDefence());
+        // content.put("responseDefence", defendantResponse.getDefence());
 
         return content;
     }

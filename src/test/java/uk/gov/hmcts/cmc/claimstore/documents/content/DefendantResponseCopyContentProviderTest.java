@@ -55,12 +55,12 @@ public class DefendantResponseCopyContentProviderTest {
         assertThat(content.get("defendant")).isInstanceOf(DefendantDetailsContent.class);
     }
 
-    @Test
-    public void shouldProvideResponseDefence() {
-        Map<String, Object> content = provider.createContent(claim);
-
-        assertThat(content)
-            .containsEntry("responseDefence", claim.getResponse().orElseThrow(IllegalStateException::new).getDefence());
-    }
+//    @Test
+//    public void shouldProvideResponseDefence() {
+//        Map<String, Object> content = provider.createContent(claim);
+//
+//        assertThat(content)
+//            .containsEntry("responseDefence", claim.getResponse().orElseThrow(IllegalStateException::new).getDefence());
+//    }
 
 }

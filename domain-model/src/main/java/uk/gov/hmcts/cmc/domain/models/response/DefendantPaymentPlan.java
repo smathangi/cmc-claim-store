@@ -5,12 +5,13 @@ import uk.gov.hmcts.cmc.domain.models.ccj.PaymentSchedule;
 import uk.gov.hmcts.cmc.domain.models.constraints.DateNotInThePast;
 import uk.gov.hmcts.cmc.domain.models.constraints.Money;
 
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
+
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import static uk.gov.hmcts.cmc.domain.utils.ToStringStyle.ourStyle;
 
@@ -68,8 +69,9 @@ public class DefendantPaymentPlan {
         return paymentSchedule;
     }
 
-    public String getExplaination() { return explaination; }
-
+    public String getExplanation() {
+        return explaination;
+    }
 
     @Override
     @SuppressWarnings("squid:S1067") // Its generated code for equals sonar
@@ -80,7 +82,8 @@ public class DefendantPaymentPlan {
         if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        uk.gov.hmcts.cmc.domain.models.response.DefendantPaymentPlan that = (uk.gov.hmcts.cmc.domain.models.response.DefendantPaymentPlan) other;
+        uk.gov.hmcts.cmc.domain.models.response.DefendantPaymentPlan that =
+            (uk.gov.hmcts.cmc.domain.models.response.DefendantPaymentPlan) other;
         return Objects.equals(firstPayment, that.firstPayment)
             && Objects.equals(instalmentAmount, that.instalmentAmount)
             && Objects.equals(firstPaymentDate, that.firstPaymentDate)

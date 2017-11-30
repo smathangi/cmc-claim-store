@@ -1,4 +1,4 @@
-package uk.gov.hmcts.cmc.domain.models.response;
+package uk.gov.hmcts.cmc.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,11 +6,14 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
 import uk.gov.hmcts.cmc.domain.models.party.Party;
-
+import uk.gov.hmcts.cmc.domain.models.response.DefendantPaymentPlan;
+import uk.gov.hmcts.cmc.domain.models.response.Evidence;
+import uk.gov.hmcts.cmc.domain.models.response.HowMuchOwed;
+import uk.gov.hmcts.cmc.domain.models.response.Timeline;
+import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Objects;
 
 import static uk.gov.hmcts.cmc.domain.utils.ToStringStyle.ourStyle;
 
@@ -38,11 +41,12 @@ public class PartialAdmissionResponseData extends ResponseData {
     @Size(max = 99000)
     private final String impactOfDispute;
 
-    public PartialAdmissionResponseData(String defence, FreeMediationOption freeMediation,
+    public PartialAdmissionResponseData(FreeMediationOption freeMediation,
                                         MoreTimeNeededOption moreTimeNeeded, Party defendant,
                                         StatementOfTruth statementOfTruth, Evidence evidence,
-                                        HowMuchOwed howMuchOwed, Timeline timeline, DefendantPaymentPlan defendantPaymentPlan, String impactOfDispute) {
-        super(defence, freeMediation, moreTimeNeeded, defendant, statementOfTruth);
+                                        HowMuchOwed howMuchOwed, Timeline timeline,
+                                        DefendantPaymentPlan defendantPaymentPlan, String impactOfDispute) {
+        super(freeMediation, moreTimeNeeded, defendant, statementOfTruth);
         this.evidence = evidence;
         this.howMuchOwed = howMuchOwed;
         this.timeline = timeline;

@@ -43,7 +43,7 @@ public class SampleResponseData {
 
     public ResponseData build() {
         return new ResponseData(
-            responseType, defence, freeMediationOption, moreTimeNeededOption, defendantDetails, statementOfTruth
+            freeMediationOption, moreTimeNeededOption, defendantDetails, statementOfTruth
         );
     }
 

@@ -2,9 +2,11 @@ package uk.gov.hmcts.cmc.domain.models.response;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Objects;
+
+import javax.validation.constraints.Size;
+
 
 public class HowMuchOwed {
 
