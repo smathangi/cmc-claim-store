@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.cmc.claimstore.MockSpringTest;
 import uk.gov.hmcts.cmc.claimstore.config.properties.emails.StaffEmailProperties;
 import uk.gov.hmcts.cmc.domain.models.Claim;
-import uk.gov.hmcts.cmc.domain.models.ResponseData;
+
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaim;
-import uk.gov.hmcts.cmc.domain.models.sampledata.SampleResponseData;
+import uk.gov.hmcts.cmc.domain.models.sampledata.SampleFullDefenceResponseData;
+
 import uk.gov.hmcts.cmc.email.EmailAttachment;
 import uk.gov.hmcts.cmc.email.EmailData;
 
@@ -46,9 +47,8 @@ public class DefendantResponseStaffNotificationServiceTest extends MockSpringTes
     public void beforeEachTest() {
         claim = SampleClaim.builder()
             .withResponse(
-                SampleResponseData
+                SampleFullDefenceResponseData
                     .builder()
-                    .withResponseType(ResponseData.ResponseType.OWE_ALL_PAID_ALL)
                     .withMediation(null)
                     .build()
             ).build();
@@ -75,7 +75,7 @@ public class DefendantResponseStaffNotificationServiceTest extends MockSpringTes
             .getSubject()).startsWith("Civil Money Claim defence submitted");
         assertThat(emailDataArgument.getValue()
             .getMessage()).startsWith(
-            "The defendant has submitted an already paid defence which is attached as a PDF."
+            "The defendant has submitted a full defence which is attached as a PDF."
         );
     }
 

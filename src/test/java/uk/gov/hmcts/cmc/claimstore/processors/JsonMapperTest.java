@@ -10,10 +10,10 @@ import uk.gov.hmcts.cmc.domain.models.ResponseData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleAddress;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleAmountRange;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaimData;
+import uk.gov.hmcts.cmc.domain.models.sampledata.SampleFullDefenceResponseData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterestDate;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleParty;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleRepresentative;
-import uk.gov.hmcts.cmc.domain.models.sampledata.SampleResponseData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleTheirDetails;
 import uk.gov.hmcts.cmc.domain.utils.ResourceReader;
 
@@ -129,8 +129,8 @@ public class JsonMapperTest {
         final ResponseData output = processor.fromJson(input, ResponseData.class);
 
         //then
-        final ResponseData expected = SampleResponseData.validDefaults();
 
+        final ResponseData expected = SampleFullDefenceResponseData.builder().build();
         assertThat(output).isEqualTo(expected);
     }
 

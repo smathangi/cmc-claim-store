@@ -10,9 +10,8 @@ import uk.gov.hmcts.cmc.claimstore.BaseIntegrationTest;
 import uk.gov.hmcts.cmc.claimstore.idam.models.GeneratePinResponse;
 import uk.gov.hmcts.cmc.claimstore.services.notifications.fixtures.SampleUserDetails;
 import uk.gov.hmcts.cmc.domain.models.Claim;
-import uk.gov.hmcts.cmc.domain.models.ResponseData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaimData;
-import uk.gov.hmcts.cmc.domain.models.sampledata.SampleResponseData;
+import uk.gov.hmcts.cmc.domain.models.sampledata.SampleFullDefenceResponseData;
 import uk.gov.hmcts.cmc.email.EmailData;
 
 import java.time.LocalDate;
@@ -137,9 +136,8 @@ public class ResendStaffNotificationsTest extends BaseIntegrationTest {
         Claim claim = claimStore.saveClaim(SampleClaimData.builder().build());
         claimStore.saveResponse(
             claim.getId(),
-            SampleResponseData
+            SampleFullDefenceResponseData
                 .builder()
-                .withResponseType(ResponseData.ResponseType.OWE_ALL_PAID_ALL)
                 .withMediation(null)
                 .build(),
             DEFENDANT_ID,
@@ -155,7 +153,7 @@ public class ResendStaffNotificationsTest extends BaseIntegrationTest {
         assertThat(emailDataArgument.getValue().getSubject())
             .isEqualTo("Civil Money Claim defence submitted: John Rambo v John Smith " + claim.getReferenceNumber());
         assertThat(emailDataArgument.getValue().getMessage()).contains(
-            "The defendant has submitted an already paid defence which is attached as a PDF",
+            "The defendant has submitted a full defence which is attached as a PDF",
             "Email: j.smith@example.com",
             "Mobile number: 07873727165"
         );

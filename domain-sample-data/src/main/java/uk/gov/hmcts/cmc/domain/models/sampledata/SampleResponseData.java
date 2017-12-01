@@ -6,12 +6,11 @@ import uk.gov.hmcts.cmc.domain.models.party.Party;
 
 public class SampleResponseData {
 
-    private ResponseData.ResponseType responseType = ResponseData.ResponseType.OWE_NONE;
-    private ResponseData.FreeMediationOption freeMediationOption = ResponseData.FreeMediationOption.YES;
-    private ResponseData.MoreTimeNeededOption moreTimeNeededOption = ResponseData.MoreTimeNeededOption.YES;
-    private String defence = "defence string";
-    private Party defendantDetails = SampleParty.builder().withRepresentative(null).individual();
-    private StatementOfTruth statementOfTruth;
+    protected ResponseData.ResponseType responseType = ResponseData.ResponseType.OWE_NONE;
+    protected ResponseData.FreeMediationOption freeMediationOption = ResponseData.FreeMediationOption.YES;
+    protected ResponseData.MoreTimeNeededOption moreTimeNeededOption = ResponseData.MoreTimeNeededOption.YES;
+    protected Party defendantDetails = SampleParty.builder().withRepresentative(null).individual();
+    protected StatementOfTruth statementOfTruth;
 
     public static SampleResponseData builder() {
         return new SampleResponseData();
@@ -21,18 +20,8 @@ public class SampleResponseData {
         return builder().build();
     }
 
-    public SampleResponseData withResponseType(final ResponseData.ResponseType responseType) {
-        this.responseType = responseType;
-        return this;
-    }
-
     public SampleResponseData withMediation(final ResponseData.FreeMediationOption freeMediationOption) {
         this.freeMediationOption = freeMediationOption;
-        return this;
-    }
-
-    public SampleResponseData withDefence(final String defence) {
-        this.defence = defence;
         return this;
     }
 
@@ -51,4 +40,5 @@ public class SampleResponseData {
         this.statementOfTruth = new StatementOfTruth(signerName,signerRole);
         return this;
     }
+
 }

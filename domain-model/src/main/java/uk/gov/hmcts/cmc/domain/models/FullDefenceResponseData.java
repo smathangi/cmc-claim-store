@@ -1,9 +1,8 @@
 package uk.gov.hmcts.cmc.domain.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
@@ -22,13 +21,12 @@ public class FullDefenceResponseData extends ResponseData {
     @Size(max = 99000)
     private final String defence;
 
-    @JsonCreator
     public FullDefenceResponseData(
-        @JsonProperty("freeMediation") FreeMediationOption freeMediation,
-        @JsonProperty("moreTimeNeeded") MoreTimeNeededOption moreTimeNeeded,
-        @JsonProperty("defendant") Party defendant,
-        @JsonProperty("statementOfTruth") StatementOfTruth statementOfTruth,
-        @JsonProperty("defence") String defence
+        final FreeMediationOption freeMediation,
+        final MoreTimeNeededOption moreTimeNeeded,
+        final Party defendant,
+        final StatementOfTruth statementOfTruth,
+        final String defence
     ) {
         super(freeMediation, moreTimeNeeded, defendant, statementOfTruth);
         this.defence = defence;

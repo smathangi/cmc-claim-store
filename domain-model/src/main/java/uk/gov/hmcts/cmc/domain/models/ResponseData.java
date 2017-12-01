@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
 import uk.gov.hmcts.cmc.domain.models.party.Party;
-
 import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -23,11 +21,11 @@ import javax.validation.constraints.NotNull;
 public class ResponseData {
 
     public enum ResponseType {
-            OWE_ALL_PAID_ALL,
-            OWE_ALL_PAID_NONE,
-            OWE_SOME_PAID_NONE,
-            OWE_ALL_PAID_SOME,
-            OWE_NONE
+        OWE_ALL_PAID_ALL,
+        OWE_ALL_PAID_NONE,
+        OWE_SOME_PAID_NONE,
+        OWE_ALL_PAID_SOME,
+        OWE_NONE
     }
 
     public enum FreeMediationOption {
@@ -56,10 +54,12 @@ public class ResponseData {
     @JsonUnwrapped
     private final MoreTimeNeededOption moreTimeNeeded;
 
-    public ResponseData(final FreeMediationOption freeMediation,
-                        final MoreTimeNeededOption moreTimeNeeded,
-                        final Party defendant,
-                        final StatementOfTruth statementOfTruth) {
+    public ResponseData(
+        final FreeMediationOption freeMediation,
+        final MoreTimeNeededOption moreTimeNeeded,
+        final Party defendant,
+        final StatementOfTruth statementOfTruth
+    ) {
         this.freeMediation = freeMediation;
         this.moreTimeNeeded = moreTimeNeeded;
         this.defendant = defendant;

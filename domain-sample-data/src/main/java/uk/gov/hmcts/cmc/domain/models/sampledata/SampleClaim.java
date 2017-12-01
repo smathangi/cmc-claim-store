@@ -62,7 +62,7 @@ public final class SampleClaim {
     }
 
     public static Claim getWithDefaultResponse() {
-        return getWithResponse(SampleResponseData.validDefaults());
+        return getWithResponse(SampleFullDefenceResponseData.validDefaults());
     }
 
     public static Claim getWithResponse(final ResponseData responseData) {

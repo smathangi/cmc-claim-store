@@ -1,9 +1,8 @@
 package uk.gov.hmcts.cmc.domain.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
@@ -24,37 +23,32 @@ import static uk.gov.hmcts.cmc.domain.utils.ToStringStyle.ourStyle;
 public class PartialAdmissionResponseData extends ResponseData {
 
     @Valid
-    @NotNull
-    private Evidence evidence;
+    private final Evidence evidence;
 
     @Valid
     @NotNull
-    private HowMuchOwed howMuchOwed;
+    private final HowMuchOwed howMuchOwed;
 
     @Valid
-    @NotNull
-    private Timeline timeline;
+    private final Timeline timeline;
 
     @Valid
-    @NotNull
-    private DefendantPaymentPlan defendantPaymentPlan;
+    private final DefendantPaymentPlan defendantPaymentPlan;
 
     @NotBlank
     @Size(max = 99000)
     private final String impactOfDispute;
 
-    @JsonCreator
     public PartialAdmissionResponseData(
-        @JsonProperty("freeMediation") FreeMediationOption freeMediation,
-        @JsonProperty("moreTimeNeeded") MoreTimeNeededOption moreTimeNeeded,
-        @JsonProperty("defendant") Party defendant,
-        @JsonProperty("statementOfTruth") StatementOfTruth statementOfTruth,
-        @JsonProperty("evidence") Evidence evidence,
-        @JsonProperty("howMuchOwed") HowMuchOwed howMuchOwed,
-        @JsonProperty("timeline") Timeline timeline,
-        @JsonProperty("defendantPaymentPlan") DefendantPaymentPlan defendantPaymentPlan,
-        @JsonProperty("impactOfDispute") String impactOfDispute)
-    {
+        final FreeMediationOption freeMediation,
+        final MoreTimeNeededOption moreTimeNeeded,
+        final Party defendant,
+        final StatementOfTruth statementOfTruth,
+        final Evidence evidence,
+        final HowMuchOwed howMuchOwed,
+        final Timeline timeline,
+        final DefendantPaymentPlan defendantPaymentPlan,
+        final String impactOfDispute) {
         super(freeMediation, moreTimeNeeded, defendant, statementOfTruth);
         this.evidence = evidence;
         this.howMuchOwed = howMuchOwed;

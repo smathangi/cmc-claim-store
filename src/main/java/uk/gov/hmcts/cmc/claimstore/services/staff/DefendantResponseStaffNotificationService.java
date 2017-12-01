@@ -7,6 +7,9 @@ import uk.gov.hmcts.cmc.claimstore.documents.DefendantResponseCopyService;
 import uk.gov.hmcts.cmc.claimstore.services.staff.content.DefendantResponseStaffNotificationEmailContentProvider;
 import uk.gov.hmcts.cmc.claimstore.services.staff.models.EmailContent;
 import uk.gov.hmcts.cmc.domain.models.Claim;
+import uk.gov.hmcts.cmc.domain.models.FullDefenceResponseData;
+import uk.gov.hmcts.cmc.domain.models.PartialAdmissionResponseData;
+import uk.gov.hmcts.cmc.domain.models.ResponseData;
 import uk.gov.hmcts.cmc.email.EmailData;
 import uk.gov.hmcts.cmc.email.EmailService;
 
@@ -66,15 +69,22 @@ public class DefendantResponseStaffNotificationService {
         Claim claim,
         String defendantEmail
     ) {
+        ResponseData response = claim.getResponse().orElseThrow(IllegalStateException::new);
+
         Map<String, Object> map = new HashMap<>();
         map.put("claim", claim);
-        map.put("response", claim.getResponse().orElseThrow(IllegalStateException::new));
+        map.put("response", response);
         map.put("defendantEmail", defendantEmail);
-        map.put("defendantMobilePhone", claim.getResponse()
-            .orElseThrow(IllegalStateException::new)
+        map.put("defendantMobilePhone", response
             .getDefendant()
             .getMobilePhone()
             .orElse(null));
+        map.put("responseType",
+            response instanceof FullDefenceResponseData ? "OWE_NONE" :
+            response instanceof PartialAdmissionResponseData ? "OWE_SOME_PAID_NONE" :
+            "ROC-???? Will do it eventually"
+        );
+
         return map;
     }
 

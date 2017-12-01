@@ -1,6 +1,7 @@
 package uk.gov.hmcts.cmc.domain.models;
 
 import org.junit.Test;
+import uk.gov.hmcts.cmc.domain.models.sampledata.SampleFullDefenceResponseData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleResponseData;
 import uk.gov.hmcts.cmc.domain.utils.ResourceReader;
 
@@ -30,30 +31,24 @@ public class ResponseDataTest {
     @Test
     public void shouldHaveValidationMessagesWhenResponseDataElementsAreInValid() {
         //given
-        ResponseData responseData = SampleResponseData.builder()
+        final ResponseData responseData = SampleFullDefenceResponseData.builder()
             .withDefence(null)
-            .withResponseType(null)
             .build();
-
         //when
         Set<String> errors = validate(responseData);
 
         //then
         assertThat(errors)
-            .hasSize(2)
-            .contains(
-                "type : may not be null",
-                "defence : may not be empty"
-            );
+            .hasSize(1)
+            .contains("defence : may not be empty");
     }
 
 
     @Test
     public void shouldHaveValidationMessagesWhenDefenceDataElementIsEmpty() {
         //given
-        ResponseData responseData = SampleResponseData.builder()
-            .withDefence("")
-            .withResponseType(null)
+        final ResponseData responseData = SampleFullDefenceResponseData.builder()
+            .withDefence(null)
             .build();
 
         //when
@@ -61,11 +56,8 @@ public class ResponseDataTest {
 
         //then
         assertThat(errors)
-            .hasSize(2)
-            .contains(
-                "type : may not be null",
-                "defence : may not be empty"
-            );
+            .hasSize(1)
+            .contains("defence : may not be empty");
     }
 
     @Test
@@ -73,18 +65,16 @@ public class ResponseDataTest {
         //given
         final String defence = new ResourceReader().read("/defence_exceeding_size_limit.text");
 
-        ResponseData responseData = SampleResponseData.builder()
-            .withDefence(defence).withResponseType(null).build();
+        final ResponseData responseData = SampleFullDefenceResponseData.builder()
+            .withDefence(defence)
+            .build();
 
         //when
         Set<String> errors = validate(responseData);
 
         //then
         assertThat(errors)
-            .hasSize(2)
-            .contains(
-                "defence : size must be between 0 and 99000",
-                "type : may not be null"
-            );
+            .hasSize(1)
+            .contains("defence : size must be between 0 and 99000");
     }
 }

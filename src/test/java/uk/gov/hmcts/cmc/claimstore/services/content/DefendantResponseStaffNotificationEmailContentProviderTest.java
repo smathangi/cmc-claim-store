@@ -10,6 +10,7 @@ import uk.gov.hmcts.cmc.claimstore.services.staff.models.EmailContent;
 import uk.gov.hmcts.cmc.domain.models.Claim;
 import uk.gov.hmcts.cmc.domain.models.ResponseData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaim;
+import uk.gov.hmcts.cmc.domain.models.sampledata.SampleFullDefenceResponseData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleParty;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleResponseData;
 
@@ -76,9 +77,7 @@ public class DefendantResponseStaffNotificationEmailContentProviderTest {
     @Test
     public void shouldUseFullDefenceTextIfFullDefenceSelected() {
         Claim claim = SampleClaim.builder().withResponse(
-            SampleResponseData.builder()
-                .withResponseType(ResponseData.ResponseType.OWE_NONE)
-                .build())
+            SampleFullDefenceResponseData.validDefaults())
             .build();
 
         EmailContent content = service.createContent(
@@ -90,24 +89,6 @@ public class DefendantResponseStaffNotificationEmailContentProviderTest {
             .doesNotContain("You need to ask the claimant if they want to proceed with the claim.");
     }
 
-    @Test
-    public void shouldUsePaidAllDefenceTextIfPaidAllDefenceSelected() {
-        EmailContent content = service.createContent(
-            wrapInMap(
-                SampleClaim.builder()
-                    .withResponse(
-                        SampleResponseData
-                            .builder()
-                            .withResponseType(ResponseData.ResponseType.OWE_ALL_PAID_ALL)
-                            .withMediation(null)
-                            .build()
-                    ).build(),
-                DEFENDANT_EMAIL));
-        assertThat(content.getBody())
-            .contains("The defendant has submitted an already paid defence which is attached as a PDF.")
-            .contains("You need to ask the claimant if they want to proceed with the claim.")
-            .doesNotContain("The defendant has submitted a full defence which is attached as a PDF.");
-    }
 
     @Test
     public void shouldUseFreeMediationTextIfFreeMediationIsRequested() {
@@ -122,7 +103,7 @@ public class DefendantResponseStaffNotificationEmailContentProviderTest {
     @Test
     public void shouldUseAlternativeTextIfFreeMediationIsNotRequested() {
         Claim claim = SampleClaim.builder().withResponse(
-            SampleResponseData.builder()
+            SampleFullDefenceResponseData.builder()
                 .withMediation(ResponseData.FreeMediationOption.NO)
                 .build())
             .build();
@@ -130,6 +111,7 @@ public class DefendantResponseStaffNotificationEmailContentProviderTest {
         EmailContent content = service.createContent(
             wrapInMap(claim, DEFENDANT_EMAIL)
         );
+        System.out.println(content.getBody());
         assertThat(content.getBody())
             .contains("The defendant has chosen not to use the free mediation service.")
             .doesNotContain("The defendant has asked to use the mediation service");
@@ -138,8 +120,7 @@ public class DefendantResponseStaffNotificationEmailContentProviderTest {
     @Test
     public void shouldShowQuestionnaireTextIfMediationNotRequestedAndIsFullDefence() {
         Claim claim = SampleClaim.builder().withResponse(
-            SampleResponseData.builder()
-                .withResponseType(ResponseData.ResponseType.OWE_NONE)
+            SampleFullDefenceResponseData.builder()
                 .withMediation(ResponseData.FreeMediationOption.NO)
                 .build())
             .build();
@@ -151,22 +132,6 @@ public class DefendantResponseStaffNotificationEmailContentProviderTest {
             .contains("You must progress to the directions questionnaire procedure.");
     }
 
-    @Test
-    public void shouldNotShowQuestionnaireTextIfMediationNotRequestedAndIsPaidAll() {
-        EmailContent content = service.createContent(
-            wrapInMap(
-                SampleClaim.builder()
-                    .withResponse(
-                        SampleResponseData.builder()
-                            .withResponseType(ResponseData.ResponseType.OWE_ALL_PAID_ALL)
-                            .withMediation(null)
-                            .build()
-                    ).build(),
-                DEFENDANT_EMAIL
-            )
-        );
-        assertThat(content.getBody())
-            .doesNotContain("You must progress to the directions questionnaire procedure.");
-    }
+
 
 }
