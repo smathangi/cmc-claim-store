@@ -6,7 +6,6 @@ import uk.gov.hmcts.cmc.domain.models.party.Party;
 
 public class SampleResponseData {
 
-    protected ResponseData.ResponseType responseType = ResponseData.ResponseType.OWE_NONE;
     protected ResponseData.FreeMediationOption freeMediationOption = ResponseData.FreeMediationOption.YES;
     protected ResponseData.MoreTimeNeededOption moreTimeNeededOption = ResponseData.MoreTimeNeededOption.YES;
     protected Party defendantDetails = SampleParty.builder().withRepresentative(null).individual();

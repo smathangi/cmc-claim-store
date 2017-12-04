@@ -20,14 +20,6 @@ import javax.validation.constraints.NotNull;
 )
 public class ResponseData {
 
-    public enum ResponseType {
-        OWE_ALL_PAID_ALL,
-        OWE_ALL_PAID_NONE,
-        OWE_SOME_PAID_NONE,
-        OWE_ALL_PAID_SOME,
-        OWE_NONE
-    }
-
     public enum FreeMediationOption {
         @JsonProperty("yes")
         YES,
