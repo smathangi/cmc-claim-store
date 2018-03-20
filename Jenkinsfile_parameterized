@@ -17,7 +17,7 @@ static Map<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
-withParameterizedPipeline('java', 'cmc', 'claim-store', 'sandbox', 'sandbox') {
+withParameterizedPipeline('java', 'cmc', 'claim-store', 'ssl', 'sandbox') {
   env.IDAM_API_URL="http://betadevbccidamapplb.reform.hmcts.net"
   loadVaultSecrets(secrets)
 }
