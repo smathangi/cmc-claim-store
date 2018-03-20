@@ -83,7 +83,7 @@ module "claim-store-api" {
 
     // urls
     FRONTEND_BASE_URL = "${var.frontend_url}"
-    PDF_SERVICE_URL = "http://cmc-pdf-service-${var.env}.service.${local.aseName}.internal"
+    PDF_SERVICE_URL = "https://cmc-pdf-service-${var.env}.service.ssl.platform.hmcts.net"
     DOCUMENT_MANAGEMENT_API_GATEWAY_URL = "false"
     CORE_CASE_DATA_API_URL = "false"
     SEND_LETTER_URL = "${var.env == "prod" || var.env == "saat" || var.env == "sprod" ? "false" : local.sendLetterUrl}"

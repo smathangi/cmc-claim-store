@@ -1,11 +1,5 @@
 #!groovy
-@Library("Infrastructure") _
-
-properties([
-		parameters([
-      choice(name: 'ENVIRONMENT', choices: 'saat\nsprod', description: 'Environment where code should be build and deployed')
-		])
-])
+@Library("Infrastructure@useVaultCert") _
 
 List<Map<String, Object>> secrets = [
   secret('AatTestUserUsername', 'SMOKE_TEST_CITIZEN_USERNAME'),
@@ -23,7 +17,7 @@ static Map<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
-withParameterizedPipeline('java', 'cmc', 'claim-store', params.ENVIRONMENT, 'sandbox') {
+withParameterizedPipeline('java', 'cmc', 'claim-store', 'sandbox', 'sandbox') {
   env.IDAM_API_URL="http://betadevbccidamapplb.reform.hmcts.net"
   loadVaultSecrets(secrets)
 }
