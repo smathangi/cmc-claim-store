@@ -1,6 +1,6 @@
 #!groovy
 
-@Library("Infrastructure")
+@Library("Infrastructure@feature/ROC-3461-java-appinsights-agent")
 
 def product = "cmc"
 def component = "claim-store"
