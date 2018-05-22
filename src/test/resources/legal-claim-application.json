@@ -42,12 +42,13 @@
   },
   "interest": {
     "type": "standard",
-    "rate": 8
-  },
-  "interestDate": {
-    "type": "custom",
-    "date": "2015-02-02",
-    "reason": "I want to claim from this date because that's when that happened"
+    "rate": 8,
+    "interestDate": {
+      "type": "custom",
+      "date": "2015-02-02",
+      "reason": "I want to claim from this date because that's when that happened",
+      "endDateType": "settled_or_judgment"
+    }
   },
   "defendants": [
     {
@@ -85,17 +86,6 @@
       }
     }
   ],
-  "payment": {
-    "id": "123",
-    "amount": 4000,
-    "reference": "reference",
-    "description": "description",
-    "date_created": "2010-10-12",
-    "state": {
-      "status": "status",
-      "finished": true
-    }
-  },
   "feeAmountInPennies": 4000,
   "feeAccountNumber": "PBA1234567",
   "reason": "reason",

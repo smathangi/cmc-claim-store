@@ -8,7 +8,7 @@ import uk.gov.hmcts.cmc.claimstore.services.interest.InterestCalculationService;
 import uk.gov.hmcts.cmc.claimstore.services.staff.content.InterestContentProvider;
 import uk.gov.hmcts.cmc.claimstore.services.staff.models.ClaimContent;
 import uk.gov.hmcts.cmc.domain.models.Claim;
-import uk.gov.hmcts.cmc.domain.models.FullDefenceResponse;
+import uk.gov.hmcts.cmc.domain.models.response.FullDefenceResponse;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaim;
 
 import java.time.Clock;
@@ -75,8 +75,27 @@ public class DefendantResponseContentProviderTest {
 
         assertThat(content)
             .containsEntry("responseDefence",
-                ((FullDefenceResponse) claim.getResponse().orElseThrow(IllegalStateException::new)).getDefence()
+                ((FullDefenceResponse) claim.getResponse().orElseThrow(IllegalStateException::new))
+                    .getDefence().orElse(null)
             );
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldProvidePaymentDeclaration() {
+        Map<String, Object> content = provider.createContent(claim);
+
+        assertThat(content).containsKey("paymentDeclaration");
+        assertThat((Map<String, String>) content.get("paymentDeclaration"))
+            .containsOnlyKeys("paidDate", "explanation")
+            .containsValues("2 January 2016", "Paid cash");
+    }
+
+    @Test
+    public void shouldProvideResponseTimeline() {
+        Map<String, Object> content = provider.createContent(claim);
+
+        assertThat(content)
+            .containsKeys("timelineComment", "events");
+    }
 }

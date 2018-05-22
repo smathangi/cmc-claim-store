@@ -2,12 +2,12 @@ package uk.gov.hmcts.cmc.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import cz.jirutka.validator.collection.constraints.EachNotNull;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
-import uk.gov.hmcts.cmc.domain.constraints.InterDependentFields;
+import uk.gov.hmcts.cmc.domain.constraints.EachNotNull;
 import uk.gov.hmcts.cmc.domain.models.amount.Amount;
+import uk.gov.hmcts.cmc.domain.models.evidence.Evidence;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
 import uk.gov.hmcts.cmc.domain.models.otherparty.TheirDetails;
 import uk.gov.hmcts.cmc.domain.models.particulars.HousingDisrepair;
@@ -30,7 +30,6 @@ import javax.validation.constraints.Size;
 import static uk.gov.hmcts.cmc.domain.utils.ToStringStyle.ourStyle;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@InterDependentFields(field = "interestDate", dependentField = "interest")
 public class ClaimData {
     @Valid
     private final UUID externalId;
@@ -63,14 +62,17 @@ public class ClaimData {
     @Valid
     private final Interest interest;
 
-    // Validated by InterDependentFields
-    private final InterestDate interestDate;
-
     @Valid
     private final PersonalInjury personalInjury;
 
     @Valid
     private final HousingDisrepair housingDisrepair;
+
+    @Valid
+    private final Timeline timeline;
+
+    @Valid
+    private final Evidence evidence;
 
     @Valid
     @NotBlank
@@ -98,7 +100,6 @@ public class ClaimData {
         Amount amount,
         BigInteger feeAmountInPennies,
         Interest interest,
-        InterestDate interestDate,
         PersonalInjury personalInjury,
         HousingDisrepair housingDisrepair,
         String reason,
@@ -106,8 +107,10 @@ public class ClaimData {
         String feeAccountNumber,
         String externalReferenceNumber,
         String preferredCourt,
-        String feeCode) {
-
+        String feeCode,
+        Timeline timeline,
+        Evidence evidence
+    ) {
         this.externalId = externalId != null ? externalId : UUID.randomUUID();
         this.claimants = claimants;
         this.defendants = defendants;
@@ -115,7 +118,6 @@ public class ClaimData {
         this.amount = amount;
         this.feeAmountInPennies = feeAmountInPennies;
         this.interest = interest;
-        this.interestDate = interestDate;
         this.personalInjury = personalInjury;
         this.housingDisrepair = housingDisrepair;
         this.reason = reason;
@@ -124,6 +126,8 @@ public class ClaimData {
         this.externalReferenceNumber = externalReferenceNumber;
         this.preferredCourt = preferredCourt;
         this.feeCode = feeCode;
+        this.timeline = timeline;
+        this.evidence = evidence;
     }
 
     public List<Party> getClaimants() {
@@ -140,10 +144,6 @@ public class ClaimData {
 
     public Interest getInterest() {
         return interest;
-    }
-
-    public InterestDate getInterestDate() {
-        return interestDate;
     }
 
     @JsonIgnore
@@ -218,6 +218,14 @@ public class ClaimData {
         return Optional.ofNullable(feeCode);
     }
 
+    public Optional<Timeline> getTimeline() {
+        return Optional.ofNullable(timeline);
+    }
+
+    public Optional<Evidence> getEvidence() {
+        return Optional.ofNullable(evidence);
+    }
+
     @Override
     @SuppressWarnings("squid:S1067") // Its generated code for equals sonar
     public boolean equals(Object other) {
@@ -234,7 +242,6 @@ public class ClaimData {
             && Objects.equals(amount, that.amount)
             && Objects.equals(feeAmountInPennies, that.feeAmountInPennies)
             && Objects.equals(interest, that.interest)
-            && Objects.equals(interestDate, that.interestDate)
             && Objects.equals(personalInjury, that.personalInjury)
             && Objects.equals(housingDisrepair, that.housingDisrepair)
             && Objects.equals(reason, that.reason)
@@ -243,7 +250,9 @@ public class ClaimData {
             && Objects.equals(externalId, that.externalId)
             && Objects.equals(externalReferenceNumber, that.externalReferenceNumber)
             && Objects.equals(preferredCourt, that.preferredCourt)
-            && Objects.equals(feeCode, that.feeCode);
+            && Objects.equals(feeCode, that.feeCode)
+            && Objects.equals(timeline, that.timeline)
+            && Objects.equals(evidence, that.evidence);
     }
 
     @Override
@@ -255,7 +264,6 @@ public class ClaimData {
             amount,
             feeAmountInPennies,
             interest,
-            interestDate,
             personalInjury,
             housingDisrepair,
             reason,
@@ -264,7 +272,9 @@ public class ClaimData {
             externalId,
             externalReferenceNumber,
             preferredCourt,
-            feeCode);
+            feeCode,
+            timeline,
+            evidence);
     }
 
     @Override

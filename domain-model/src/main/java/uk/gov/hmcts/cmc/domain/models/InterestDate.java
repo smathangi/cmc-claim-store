@@ -3,19 +3,27 @@ package uk.gov.hmcts.cmc.domain.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import uk.gov.hmcts.cmc.domain.constraints.DateNotInTheFuture;
-import uk.gov.hmcts.cmc.domain.constraints.InterDependentFields;
 
 import java.time.LocalDate;
 import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
-@InterDependentFields.List({@InterDependentFields(field = "date", dependentField = "type"),
-    @InterDependentFields(field = "reason", dependentField = "type")})
+import static uk.gov.hmcts.cmc.domain.utils.ToStringStyle.ourStyle;
+
 public class InterestDate {
     public enum InterestDateType {
         @JsonProperty("custom")
         CUSTOM,
+
+        @JsonProperty("submission")
+        SUBMISSION
+    }
+
+    public enum InterestEndDateType {
+        @JsonProperty("settled_or_judgment")
+        SETTLED_OR_JUDGMENT,
 
         @JsonProperty("submission")
         SUBMISSION
@@ -30,10 +38,13 @@ public class InterestDate {
 
     private final String reason;
 
-    public InterestDate(InterestDateType type, LocalDate date, String reason) {
+    private final InterestEndDateType endDateType;
+
+    public InterestDate(InterestDateType type, LocalDate date, String reason, InterestEndDateType endDateType) {
         this.type = type;
         this.date = date;
         this.reason = reason;
+        this.endDateType = endDateType == null ? InterestEndDateType.SETTLED_OR_JUDGMENT : endDateType;
     }
 
     public InterestDateType getType() {
@@ -46,6 +57,25 @@ public class InterestDate {
 
     public String getReason() {
         return reason;
+    }
+
+    public InterestEndDateType getEndDateType() {
+        return endDateType;
+    }
+
+    @JsonIgnore
+    public boolean isEndDateOnClaimComplete() {
+        return endDateType.equals(InterestEndDateType.SETTLED_OR_JUDGMENT);
+    }
+
+    @JsonIgnore
+    public boolean isEndDateOnSubmission() {
+        return endDateType.equals(InterestEndDateType.SUBMISSION);
+    }
+
+    @JsonIgnore
+    public boolean isCustom() {
+        return type.equals(InterestDate.InterestDateType.CUSTOM);
     }
 
     @JsonIgnore
@@ -64,11 +94,17 @@ public class InterestDate {
         InterestDate that = (InterestDate) other;
         return Objects.equals(type, that.type)
             && Objects.equals(date, that.date)
-            && Objects.equals(reason, that.reason);
+            && Objects.equals(reason, that.reason)
+            && Objects.equals(endDateType, that.endDateType);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(type, date, reason);
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this, ourStyle());
     }
 }

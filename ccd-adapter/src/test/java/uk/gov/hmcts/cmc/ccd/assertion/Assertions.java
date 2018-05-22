@@ -5,20 +5,24 @@ import uk.gov.hmcts.cmc.ccd.domain.CCDContactDetails;
 import uk.gov.hmcts.cmc.ccd.domain.CCDInterest;
 import uk.gov.hmcts.cmc.ccd.domain.CCDInterestDate;
 import uk.gov.hmcts.cmc.ccd.domain.CCDPayment;
-import uk.gov.hmcts.cmc.ccd.domain.CCDPaymentState;
 import uk.gov.hmcts.cmc.ccd.domain.CCDRepresentative;
 import uk.gov.hmcts.cmc.domain.models.Address;
 import uk.gov.hmcts.cmc.domain.models.Claim;
 import uk.gov.hmcts.cmc.domain.models.ClaimData;
 import uk.gov.hmcts.cmc.domain.models.CountyCourtJudgment;
-import uk.gov.hmcts.cmc.domain.models.FullDefenceResponse;
 import uk.gov.hmcts.cmc.domain.models.Interest;
+import uk.gov.hmcts.cmc.domain.models.InterestBreakdown;
 import uk.gov.hmcts.cmc.domain.models.InterestDate;
 import uk.gov.hmcts.cmc.domain.models.Payment;
-import uk.gov.hmcts.cmc.domain.models.PaymentState;
+import uk.gov.hmcts.cmc.domain.models.PaymentDeclaration;
+import uk.gov.hmcts.cmc.domain.models.Timeline;
+import uk.gov.hmcts.cmc.domain.models.TimelineEvent;
 import uk.gov.hmcts.cmc.domain.models.amount.Amount;
 import uk.gov.hmcts.cmc.domain.models.amount.AmountRange;
 import uk.gov.hmcts.cmc.domain.models.ccj.RepaymentPlan;
+import uk.gov.hmcts.cmc.domain.models.evidence.DefendantEvidence;
+import uk.gov.hmcts.cmc.domain.models.evidence.Evidence;
+import uk.gov.hmcts.cmc.domain.models.evidence.EvidenceRow;
 import uk.gov.hmcts.cmc.domain.models.legalrep.ContactDetails;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
 import uk.gov.hmcts.cmc.domain.models.offers.Offer;
@@ -28,11 +32,14 @@ import uk.gov.hmcts.cmc.domain.models.otherparty.CompanyDetails;
 import uk.gov.hmcts.cmc.domain.models.otherparty.IndividualDetails;
 import uk.gov.hmcts.cmc.domain.models.otherparty.OrganisationDetails;
 import uk.gov.hmcts.cmc.domain.models.otherparty.SoleTraderDetails;
+import uk.gov.hmcts.cmc.domain.models.otherparty.TheirDetails;
 import uk.gov.hmcts.cmc.domain.models.party.Company;
 import uk.gov.hmcts.cmc.domain.models.party.Individual;
 import uk.gov.hmcts.cmc.domain.models.party.Organisation;
 import uk.gov.hmcts.cmc.domain.models.party.Party;
 import uk.gov.hmcts.cmc.domain.models.party.SoleTrader;
+import uk.gov.hmcts.cmc.domain.models.response.DefendantTimeline;
+import uk.gov.hmcts.cmc.domain.models.response.FullDefenceResponse;
 
 public class Assertions {
 
@@ -65,14 +72,6 @@ public class Assertions {
 
     public static CCDPaymentAssert assertThat(CCDPayment ccdPayment) {
         return new CCDPaymentAssert(ccdPayment);
-    }
-
-    public static PaymentStateAssert assertThat(PaymentState paymentState) {
-        return new PaymentStateAssert(paymentState);
-    }
-
-    public static CCDPaymentStateAssert assertThat(CCDPaymentState ccdPaymentState) {
-        return new CCDPaymentStateAssert(ccdPaymentState);
     }
 
     public static CCDInterestDateAssert assertThat(CCDInterestDate ccdInterestDate) {
@@ -109,6 +108,11 @@ public class Assertions {
 
     public static PartyAssert assertThat(Party party) {
         return new PartyAssert(party);
+    }
+
+
+    public static TheirDetailsAssert assertThat(TheirDetails party) {
+        return new TheirDetailsAssert(party);
     }
 
     public static ClaimDataAssert assertThat(ClaimData claimData) {
@@ -169,5 +173,37 @@ public class Assertions {
 
     public static OfferAssert assertThat(Offer offer) {
         return new OfferAssert(offer);
+    }
+
+    public static PaymentDeclarationAssert assertThat(PaymentDeclaration actual) {
+        return new PaymentDeclarationAssert(actual);
+    }
+
+    public static TimelineEventAssert assertThat(TimelineEvent timelineEvent) {
+        return new TimelineEventAssert(timelineEvent);
+    }
+
+    public static TimelineAssert assertThat(Timeline timeline) {
+        return new TimelineAssert(timeline);
+    }
+
+    public static EvidenceRowAssert assertThat(EvidenceRow evidenceRow) {
+        return new EvidenceRowAssert(evidenceRow);
+    }
+
+    public static EvidenceAssert assertThat(Evidence evidence) {
+        return new EvidenceAssert(evidence);
+    }
+
+    public static InterestBreakdownAssert assertThat(InterestBreakdown interestBreakdown) {
+        return new InterestBreakdownAssert(interestBreakdown);
+    }
+
+    public static DefendantTimelineAssert assertThat(DefendantTimeline timeline) {
+        return new DefendantTimelineAssert(timeline);
+    }
+
+    public static DefendantEvidenceAssert assertThat(DefendantEvidence evidence) {
+        return new DefendantEvidenceAssert(evidence);
     }
 }

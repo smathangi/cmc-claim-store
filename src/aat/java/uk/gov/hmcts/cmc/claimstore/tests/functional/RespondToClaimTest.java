@@ -1,33 +1,35 @@
 package uk.gov.hmcts.cmc.claimstore.tests.functional;
 
-import io.restassured.RestAssured;
+import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import uk.gov.hmcts.cmc.claimstore.idam.models.User;
 import uk.gov.hmcts.cmc.claimstore.tests.BaseTest;
 import uk.gov.hmcts.cmc.domain.models.Claim;
-import uk.gov.hmcts.cmc.domain.models.FullDefenceResponse;
-import uk.gov.hmcts.cmc.domain.models.Response;
+import uk.gov.hmcts.cmc.domain.models.response.DefenceType;
+import uk.gov.hmcts.cmc.domain.models.response.Response;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleResponse;
 
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static uk.gov.hmcts.cmc.domain.utils.LocalDateTimeFactory.nowInLocalZone;
 
 public class RespondToClaimTest extends BaseTest {
 
-    @Autowired
-    private FunctionalTestsUsers functionalTestsUsers;
+    private User claimant;
+
+    @Before
+    public void before() {
+        claimant = idamTestService.createCitizen();
+    }
 
     @Test
     public void shouldBeAbleToSuccessfullySubmitDisputeDefence() {
-        Response fullDefenceDisputeResponse = SampleResponse.FullDefence.builder()
-            .withDefenceType(FullDefenceResponse.DefenceType.DISPUTE)
+        Response fullDefenceDisputeResponse = SampleResponse.FullDefence
+            .builder()
+            .withDefenceType(DefenceType.DISPUTE)
             .build();
         shouldBeAbleToSuccessfullySubmit(fullDefenceDisputeResponse);
     }
@@ -35,27 +37,25 @@ public class RespondToClaimTest extends BaseTest {
     @Test
     public void shouldBeAbleToSuccessfullySubmitAlreadyPaidDefence() {
         Response fullDefenceAlreadyPaidResponse = SampleResponse.FullDefence.builder()
-            .withDefenceType(FullDefenceResponse.DefenceType.ALREADY_PAID)
+            .withDefenceType(DefenceType.ALREADY_PAID)
             .withMediation(null)
             .build();
         shouldBeAbleToSuccessfullySubmit(fullDefenceAlreadyPaidResponse);
     }
 
     private void shouldBeAbleToSuccessfullySubmit(Response response) {
+        String claimantId = claimant.getUserDetails().getId();
         Claim createdCase = commonOperations.submitClaim(
-            functionalTestsUsers.getClaimant().getAuthorisation(),
-            functionalTestsUsers.getClaimant().getUserDetails().getId()
+            claimant.getAuthorisation(),
+            claimantId
         );
 
-        User defendant = idamTestService.createCitizen();
-
+        User defendant = idamTestService.createDefendant(createdCase.getLetterHolderId());
         commonOperations.linkDefendant(
-            createdCase.getExternalId(),
-            defendant.getAuthorisation(),
-            defendant.getUserDetails().getId()
+            defendant.getAuthorisation()
         );
 
-        Claim updatedCase = respondToClaim(createdCase.getExternalId(), defendant, response)
+        Claim updatedCase = commonOperations.submitResponse(response, createdCase.getExternalId(), defendant)
             .then()
             .statusCode(HttpStatus.OK.value())
             .and()
@@ -63,41 +63,28 @@ public class RespondToClaimTest extends BaseTest {
 
         assertThat(updatedCase.getResponse().isPresent()).isTrue();
         assertThat(updatedCase.getResponse().get()).isEqualTo(response);
-        assertThat(updatedCase.getRespondedAt()).isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS));
+        assertThat(updatedCase.getRespondedAt()).isCloseTo(nowInLocalZone(), within(2, ChronoUnit.MINUTES));
     }
 
     @Test
     public void shouldReturnUnprocessableEntityWhenInvalidResponseIsSubmitted() {
+        String claimantId = claimant.getUserDetails().getId();
         Claim createdCase = commonOperations.submitClaim(
-            functionalTestsUsers.getClaimant().getAuthorisation(),
-            functionalTestsUsers.getClaimant().getUserDetails().getId()
+            claimant.getAuthorisation(),
+            claimantId
         );
 
-        User defendant = idamTestService.createCitizen();
-
+        User defendant = idamTestService.createDefendant(createdCase.getLetterHolderId());
         commonOperations.linkDefendant(
-            createdCase.getExternalId(),
-            defendant.getAuthorisation(),
-            defendant.getUserDetails().getId()
+            defendant.getAuthorisation()
         );
 
         Response invalidResponse = SampleResponse.FullDefence.builder()
-            .withDefence(null)
+            .withDefenceType(null)
             .build();
 
-        respondToClaim(createdCase.getExternalId(), defendant, invalidResponse)
+        commonOperations.submitResponse(invalidResponse, createdCase.getExternalId(), defendant)
             .then()
             .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
     }
-
-    private io.restassured.response.Response respondToClaim(String claimExternalId, User defendant, Response response) {
-        return RestAssured
-            .given()
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .header(HttpHeaders.AUTHORIZATION, defendant.getAuthorisation())
-            .body(jsonMapper.toJson(response))
-            .when()
-            .post("/responses/claim/" + claimExternalId + "/defendant/" + defendant.getUserDetails().getId());
-    }
-
 }

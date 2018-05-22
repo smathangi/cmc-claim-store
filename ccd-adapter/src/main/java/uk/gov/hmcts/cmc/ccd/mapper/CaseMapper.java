@@ -7,9 +7,9 @@ import uk.gov.hmcts.cmc.ccd.mapper.offers.SettlementMapper;
 import uk.gov.hmcts.cmc.ccd.mapper.response.ResponseMapper;
 import uk.gov.hmcts.cmc.domain.models.Claim;
 import uk.gov.hmcts.cmc.domain.models.CountyCourtJudgment;
-import uk.gov.hmcts.cmc.domain.models.FullDefenceResponse;
-import uk.gov.hmcts.cmc.domain.models.Response;
 import uk.gov.hmcts.cmc.domain.models.offers.Settlement;
+import uk.gov.hmcts.cmc.domain.models.response.FullDefenceResponse;
+import uk.gov.hmcts.cmc.domain.models.response.Response;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,6 +18,8 @@ import static java.time.format.DateTimeFormatter.ISO_DATE;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static uk.gov.hmcts.cmc.ccd.domain.CCDYesNoOption.NO;
 import static uk.gov.hmcts.cmc.ccd.domain.CCDYesNoOption.YES;
+import static uk.gov.hmcts.cmc.domain.utils.LocalDateTimeFactory.fromNullableUTCtoLocalZone;
+import static uk.gov.hmcts.cmc.domain.utils.LocalDateTimeFactory.fromUTC;
 
 @Component
 public class CaseMapper implements Mapper<CCDCase, Claim> {
@@ -62,6 +64,14 @@ public class CaseMapper implements Mapper<CCDCase, Claim> {
             builder.settlementReachedAt(claim.getSettlementReachedAt());
         }
 
+        if (claim.getLetterHolderId() != null) {
+            builder.letterHolderId(claim.getLetterHolderId());
+        }
+
+        if (claim.getDefendantId() != null) {
+            builder.defendantId(claim.getDefendantId());
+        }
+
         return builder
             .id(claim.getId())
             .externalId(claim.getExternalId())
@@ -98,23 +108,23 @@ public class CaseMapper implements Mapper<CCDCase, Claim> {
         return new Claim(
             ccdCase.getId(),
             ccdCase.getSubmitterId(),
-            null,
-            null,
+            ccdCase.getLetterHolderId(),
+            ccdCase.getDefendantId(),
             ccdCase.getExternalId(),
             ccdCase.getReferenceNumber(),
             claimMapper.from(ccdCase.getClaimData()),
-            LocalDateTime.parse(ccdCase.getSubmittedOn(), ISO_DATE_TIME),
+            fromUTC(LocalDateTime.parse(ccdCase.getSubmittedOn(), ISO_DATE_TIME)),
             LocalDate.parse(ccdCase.getIssuedOn(), ISO_DATE),
             ccdCase.getResponseDeadline(),
-            ccdCase.getMoreTimeRequested() == YES ? true : false,
+            ccdCase.getMoreTimeRequested() == YES,
             ccdCase.getSubmitterEmail(),
-            ccdCase.getRespondedAt(),
+            fromNullableUTCtoLocalZone(ccdCase.getRespondedAt()),
             response,
             ccdCase.getDefendantEmail(),
             countyCourtJudgment,
-            ccdCase.getCountyCourtJudgmentRequestedAt(),
+            fromNullableUTCtoLocalZone(ccdCase.getCountyCourtJudgmentRequestedAt()),
             settlement,
-            ccdCase.getSettlementReachedAt(),
+            fromNullableUTCtoLocalZone(ccdCase.getSettlementReachedAt()),
             null
         );
     }

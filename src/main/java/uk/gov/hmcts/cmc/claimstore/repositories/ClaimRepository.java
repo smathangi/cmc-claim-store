@@ -55,6 +55,9 @@ public interface ClaimRepository {
     List<Claim> getByExternalReference(@Bind("externalReference") String externalReference,
                                        @Bind("submitterId") String submitterId);
 
+    @SqlQuery(SELECT_FROM_STATEMENT + " WHERE claim.is_migrated = false")
+    List<Claim> getAllNotMigratedClaims();
+
     @SingleValueResult
     @SqlQuery(SELECT_FROM_STATEMENT + " WHERE claim.id = :id")
     Optional<Claim> getById(@Bind("id") Long id);
@@ -136,14 +139,6 @@ public interface ClaimRepository {
     );
 
     @SqlUpdate(
-        "UPDATE claim SET defendant_id = :defendantId WHERE id = :claimId"
-    )
-    Integer linkDefendant(
-        @Bind("claimId") Long claimId,
-        @Bind("defendantId") String defendantId
-    );
-
-    @SqlUpdate(
         "UPDATE claim SET more_time_requested = TRUE, response_deadline = :responseDeadline "
             + "WHERE external_id = :externalId AND more_time_requested = FALSE"
     )
@@ -155,14 +150,12 @@ public interface ClaimRepository {
     @SqlUpdate(
         "UPDATE CLAIM SET "
             + "response = :response::JSONB, "
-            + "defendant_id = :defendantId, "
             + "defendant_email = :defendantEmail, "
             + "responded_at = now() AT TIME ZONE 'utc' "
             + "WHERE external_id = :externalId"
     )
     void saveDefendantResponse(
         @Bind("externalId") String externalId,
-        @Bind("defendantId") String defendantId,
         @Bind("defendantEmail") String defendantEmail,
         @Bind("response") String response
     );
@@ -174,5 +167,13 @@ public interface ClaimRepository {
     void saveCountyCourtJudgment(
         @Bind("externalId") String externalId,
         @Bind("countyCourtJudgmentData") String countyCourtJudgmentData
+    );
+
+    @SqlUpdate(
+        "UPDATE claim SET defendant_id = :defendantId WHERE letter_holder_id = :letterHolderId AND defendant_id is null"
+    )
+    Integer linkDefendant(
+        @Bind("letterHolderId") String letterHolderId,
+        @Bind("defendantId") String defendantId
     );
 }

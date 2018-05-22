@@ -1,6 +1,5 @@
 package uk.gov.hmcts.cmc.ccd.mapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.cmc.ccd.domain.CCDClaim;
 import uk.gov.hmcts.cmc.ccd.domain.CCDCollectionElement;
@@ -25,20 +24,23 @@ public class ClaimMapper implements Mapper<CCDClaim, ClaimData> {
     private final AmountMapper amountMapper;
     private final PaymentMapper paymentMapper;
     private final InterestMapper interestMapper;
-    private final InterestDateMapper interestDateMapper;
+    private final TimelineMapper timelineMapper;
+    private final EvidenceMapper evidenceMapper;
 
-    @Autowired
     @SuppressWarnings("squid:S00107") //Constructor need all mapper for claim data  mapping
-    public ClaimMapper(PersonalInjuryMapper personalInjuryMapper,
-                       HousingDisrepairMapper housingDisrepairMapper,
-                       StatementOfTruthMapper statementOfTruthMapper,
-                       PartyMapper partyMapper,
-                       TheirDetailsMapper theirDetailsMapper,
-                       AmountMapper amountMapper,
-                       PaymentMapper paymentMapper,
-                       InterestMapper interestMapper,
-                       InterestDateMapper interestDateMapper) {
-
+    public ClaimMapper(
+        PersonalInjuryMapper personalInjuryMapper,
+        HousingDisrepairMapper housingDisrepairMapper,
+        StatementOfTruthMapper statementOfTruthMapper,
+        PartyMapper partyMapper,
+        TheirDetailsMapper theirDetailsMapper,
+        AmountMapper amountMapper,
+        PaymentMapper paymentMapper,
+        InterestMapper interestMapper,
+        InterestDateMapper interestDateMapper,
+        TimelineMapper timelineMapper,
+        EvidenceMapper evidenceMapper
+    ) {
         this.personalInjuryMapper = personalInjuryMapper;
         this.housingDisrepairMapper = housingDisrepairMapper;
         this.statementOfTruthMapper = statementOfTruthMapper;
@@ -47,7 +49,8 @@ public class ClaimMapper implements Mapper<CCDClaim, ClaimData> {
         this.amountMapper = amountMapper;
         this.paymentMapper = paymentMapper;
         this.interestMapper = interestMapper;
-        this.interestDateMapper = interestDateMapper;
+        this.timelineMapper = timelineMapper;
+        this.evidenceMapper = evidenceMapper;
     }
 
     @Override
@@ -76,10 +79,15 @@ public class ClaimMapper implements Mapper<CCDClaim, ClaimData> {
             .map(this::mapToValue)
             .collect(Collectors.toList()));
 
+        claimData.getTimeline()
+            .ifPresent(timeline -> builder.timeline(timelineMapper.to(timeline)));
+
+        claimData.getEvidence()
+            .ifPresent(evidence -> builder.evidence((evidenceMapper.to(evidence))));
+
         return builder
             .payment(paymentMapper.to(claimData.getPayment()))
             .interest(interestMapper.to(claimData.getInterest()))
-            .interestDate(interestDateMapper.to(claimData.getInterestDate()))
             .reason(claimData.getReason())
             .amount(amountMapper.to(claimData.getAmount()))
             .feeAmountInPennies(claimData.getFeeAmountInPennies())
@@ -115,7 +123,6 @@ public class ClaimMapper implements Mapper<CCDClaim, ClaimData> {
             amountMapper.from(ccdClaim.getAmount()),
             ccdClaim.getFeeAmountInPennies(),
             interestMapper.from(ccdClaim.getInterest()),
-            interestDateMapper.from(ccdClaim.getInterestDate()),
             personalInjuryMapper.from(ccdClaim.getPersonalInjury()),
             housingDisrepairMapper.from(ccdClaim.getHousingDisrepair()),
             ccdClaim.getReason(),
@@ -123,6 +130,8 @@ public class ClaimMapper implements Mapper<CCDClaim, ClaimData> {
             ccdClaim.getFeeAccountNumber(),
             ccdClaim.getExternalReferenceNumber(),
             ccdClaim.getPreferredCourt(),
-            ccdClaim.getFeeCode());
+            ccdClaim.getFeeCode(),
+            timelineMapper.from(ccdClaim.getTimeline()),
+            evidenceMapper.from(ccdClaim.getEvidence()));
     }
 }

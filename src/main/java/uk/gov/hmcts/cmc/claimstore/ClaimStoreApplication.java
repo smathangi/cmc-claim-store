@@ -3,13 +3,14 @@ package uk.gov.hmcts.cmc.claimstore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class, scanBasePackages = "uk.gov.hmcts")
 @SuppressWarnings({"HideUtilityClassConstructor", "squid:S1118"}) // Spring needs a constructor, its not a utility class
 @EnableFeignClients(basePackages =
     {"uk.gov.hmcts.cmc.claimstore",
-        "uk.gov.hmcts.reform.authorisation"
+        "uk.gov.hmcts.reform.authorisation",
+        "uk.gov.hmcts.reform.sendletter"
     })
 public class ClaimStoreApplication {
 

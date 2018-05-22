@@ -43,8 +43,7 @@ public class DefendantPinLetterContentProvider {
             .getAmount())
             .getTotalAmount());
         totalAmountComponents.add(claim.getClaimData()
-            .getPayment()
-            .getAmountInPounds());
+            .getFeesPaidInPound());
 
         if (!claim.getClaimData()
             .getInterest()
@@ -54,11 +53,13 @@ public class DefendantPinLetterContentProvider {
                 claim.getClaimData()
                     .getInterest(),
                 claim.getClaimData()
+                    .getInterest()
                     .getInterestDate(),
                 ((AmountBreakDown)claim.getClaimData()
                     .getAmount())
                     .getTotalAmount(),
-                claim.getCreatedAt()
+                claim.getIssuedOn(),
+                claim.getIssuedOn()
             );
             totalAmountComponents.add(interestContent.getAmountRealValue());
         }
@@ -77,7 +78,7 @@ public class DefendantPinLetterContentProvider {
                 .filter(Objects::nonNull)
                 .reduce(ZERO, BigDecimal::add))
         );
-        content.put("frontendBaseURL", notificationsProperties.getFrontendBaseUrl());
+        content.put("respondToClaimUrl", notificationsProperties.getRespondToClaimUrl());
         content.put("claimReferenceNumber", claim.getReferenceNumber());
         content.put("defendantPin", defendantPin);
         content.put("responseDeadline", formatDate(claim.getResponseDeadline()));

@@ -1,17 +1,11 @@
 package uk.gov.hmcts.cmc.claimstore.config.properties.pdf;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
+import static uk.gov.hmcts.cmc.claimstore.utils.ResourceReader.readBytes;
 
 @Component
 public class DocumentTemplates {
-
-    public byte[] getDefendantResponseCopy() {
-        return readBytes("/staff/templates/document/defendantResponseCopy.html");
-    }
 
     public byte[] getDefendantResponseReceipt() {
         return readBytes("/citizen/templates/document/defendantResponseReceipt.html");
@@ -41,11 +35,4 @@ public class DocumentTemplates {
         return readBytes("/staff/templates/document/settlementAgreement.html");
     }
 
-    private byte[] readBytes(String resourcePath) {
-        try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
-            return IOUtils.toByteArray(inputStream);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
 }

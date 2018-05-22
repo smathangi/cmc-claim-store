@@ -9,6 +9,9 @@ import java.math.BigDecimal;
 @Builder
 public class CCDInterest {
     private CCDInterestType type;
+    private CCDInterestBreakdown interestBreakdown;
     private BigDecimal rate;
     private String reason;
+    private BigDecimal specificDailyAmount;
+    private CCDInterestDate interestDate;
 }

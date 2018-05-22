@@ -26,23 +26,18 @@
       {
         "reason": "reason",
         "amount": 40
-      },
-      {
-      },
-      {
-      },
-      {
       }
     ]
   },
   "interest": {
     "type": "standard",
-    "rate": 8
-  },
-  "interestDate": {
-    "type": "custom",
-    "date": "2015-02-02",
-    "reason": "I want to claim from this date because that's when that happened"
+    "rate": 8,
+    "interestDate": {
+      "type": "custom",
+      "date": "2015-02-02",
+      "reason": "I want to claim from this date because that's when that happened",
+      "endDateType": "settled_or_judgment"
+    }
   },
   "defendants": [
     {
@@ -59,17 +54,27 @@
     }
   ],
   "payment": {
-    "id": "123",
     "amount": 4000,
-    "reference": "reference",
-    "description": "description",
-    "date_created": "2010-10-12",
-    "state": {
-      "status": "status",
-      "finished": true
-    }
+    "reference": "RC-1524-6488-1670-7520",
+    "status": "success"
   },
   "feeAmountInPennies": 4000,
   "reason": "reason",
-  "feeCode": "X0012"
+  "feeCode": "X0012",
+  "timeline": {
+    "rows": [
+      {
+        "date": "Last Year",
+        "description": "signed a contract"
+      }
+    ]
+  },
+  "evidence": {
+    "rows": [
+      {
+        "type": "CORRESPONDENCE",
+        "description": "description"
+      }
+    ]
+  }
 }

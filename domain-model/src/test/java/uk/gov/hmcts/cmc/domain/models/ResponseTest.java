@@ -1,6 +1,7 @@
 package uk.gov.hmcts.cmc.domain.models;
 
 import org.junit.Test;
+import uk.gov.hmcts.cmc.domain.models.response.Response;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleResponse;
 import uk.gov.hmcts.cmc.domain.utils.ResourceReader;
 
@@ -11,7 +12,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.cmc.domain.utils.BeanValidator.validate;
+import static uk.gov.hmcts.cmc.domain.BeanValidator.validate;
 
 public class ResponseTest {
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -31,7 +32,6 @@ public class ResponseTest {
     public void shouldHaveValidationMessagesWhenResponseDataElementsAreInValid() {
         //given
         Response response = SampleResponse.FullDefence.builder()
-            .withDefence(null)
             .withDefenceType(null)
             .build();
 
@@ -40,20 +40,17 @@ public class ResponseTest {
 
         //then
         assertThat(errors)
-            .hasSize(2)
+            .hasSize(1)
             .contains(
-                "defenceType : may not be null",
-                "defence : may not be empty"
+                "defenceType : may not be null"
             );
     }
 
-
     @Test
-    public void shouldHaveValidationMessagesWhenDefenceDataElementIsEmpty() {
+    public void shouldHaveValidationMessagesWhenDefenceIsEmpty() {
         //given
         Response response = SampleResponse.FullDefence.builder()
             .withDefence("")
-            .withDefenceType(null)
             .build();
 
         //when
@@ -61,10 +58,9 @@ public class ResponseTest {
 
         //then
         assertThat(errors)
-            .hasSize(2)
+            .hasSize(1)
             .contains(
-                "defence : may not be empty",
-                "defenceType : may not be null"
+                "defence : size must be between 1 and 99000"
             );
     }
 
@@ -75,7 +71,6 @@ public class ResponseTest {
 
         Response response = SampleResponse.FullDefence.builder()
             .withDefence(defence)
-            .withDefenceType(null)
             .build();
 
         //when
@@ -83,10 +78,9 @@ public class ResponseTest {
 
         //then
         assertThat(errors)
-            .hasSize(2)
+            .hasSize(1)
             .contains(
-                "defence : size must be between 0 and 99000",
-                "defenceType : may not be null"
+                "defence : size must be between 1 and 99000"
             );
     }
 }

@@ -9,7 +9,7 @@ import uk.gov.hmcts.cmc.domain.models.sampledata.SampleTheirDetails;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.cmc.domain.utils.BeanValidator.validate;
+import static uk.gov.hmcts.cmc.domain.BeanValidator.validate;
 
 public class TheirDetailsTest {
 
@@ -77,7 +77,7 @@ public class TheirDetailsTest {
 
         assertThat(validationErrors)
             .hasSize(1)
-            .contains("address.postcode : Postcode should not be empty");
+            .contains("address.postcode : Postcode is not of valid format");
     }
 
     @Test
@@ -177,6 +177,6 @@ public class TheirDetailsTest {
 
         assertThat(validationErrors)
             .hasSize(1)
-            .contains("serviceAddress.postcode : Postcode should not be empty");
+            .contains("serviceAddress.postcode : Postcode is not of valid format");
     }
 }

@@ -2,11 +2,9 @@ package uk.gov.hmcts.cmc.domain.amount;
 
 import org.junit.Test;
 import uk.gov.hmcts.cmc.domain.models.Claim;
-import uk.gov.hmcts.cmc.domain.models.sampledata.SampleAmountBreakdown;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleAmountRange;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaim;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaimData;
-import uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterestDate;
 
 import java.math.BigDecimal;
@@ -16,6 +14,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleAmountBreakdown.validDefaults;
+import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest.breakdownInterestBuilder;
+import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest.noInterest;
+import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest.standardInterestBuilder;
 
 public class TotalAmountCalculatorTest {
 
@@ -71,8 +73,8 @@ public class TotalAmountCalculatorTest {
         Claim claimNoInterest = SampleClaim.builder()
             .withClaimData(
                 SampleClaimData.builder()
-                    .withAmount(SampleAmountBreakdown.validDefaults())
-                    .withInterest(SampleInterest.noInterest())
+                    .withAmount(validDefaults())
+                    .withInterest(noInterest())
                     .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
                     .build()
             ).build();
@@ -86,8 +88,8 @@ public class TotalAmountCalculatorTest {
         Claim claimNoInterest = SampleClaim.builder()
             .withClaimData(
                 SampleClaimData.builder()
-                    .withAmount(SampleAmountBreakdown.validDefaults())
-                    .withInterest(SampleInterest.noInterest())
+                    .withAmount(validDefaults())
+                    .withInterest(noInterest())
                     .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
                     .build()
             ).build();
@@ -97,26 +99,332 @@ public class TotalAmountCalculatorTest {
     }
 
     @Test
-    public void totalTillTodayShouldReturnCalculatedTotalAmountPlusInterestWhenCalculateFromSubmission() {
+    public void totalTillTodayShouldReturnCalculatedTotalAmountPlusInterestWhenCalculateFromIssuedOn() {
 
-        Claim claimNoInterest = SampleClaim.builder()
+        Claim claimStandardInterest = SampleClaim.builder()
             .withClaimData(
                 SampleClaimData.builder()
-                    .withAmount(SampleAmountBreakdown.validDefaults())
+                    .withAmount(validDefaults())
                     .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
-                    .withInterest(SampleInterest.standard())
-                    .withInterestDate(SampleInterestDate.submission())
-                    .build()
-            ).build();
+                    .withInterest(
+                        standardInterestBuilder()
+                            .withInterestDate(SampleInterestDate.submission())
+                            .build())
+                        .build())
+                .build();
 
-        assertThat(TotalAmountCalculator.totalTillDateOfIssue(claimNoInterest))
+        assertThat(TotalAmountCalculator.totalTillDateOfIssue(claimStandardInterest))
             .isEqualTo(Optional.of(format(new BigDecimal("60"))));
+    }
+
+    @Test
+    public void totalTillTodayShouldNotIncludeInterestWhenClaimIssuedOnIsToday() {
+        Claim claimStandardInterest = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        standardInterestBuilder()
+                            .withInterestDate(SampleInterestDate.submission())
+                            .build())
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now())
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillToday(claimStandardInterest))
+            .isEqualTo(Optional.of(format(new BigDecimal("60"))));
+    }
+
+    @Test
+    public void totalTillTodayShouldNotIncludeInterestWhenClaimIssuedOnIsTomorrow() {
+        Claim claimStandardInterest = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                        .withInterest(
+                            standardInterestBuilder()
+                                .withInterestDate(SampleInterestDate.submission())
+                                .build())
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().plusDays(1))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillToday(claimStandardInterest))
+            .isEqualTo(Optional.of(format(new BigDecimal("60"))));
+    }
+
+    @Test
+    public void totalTillTodayShouldIncludeOneDayInterestWhenClaimIssuedOnIsYesterday() {
+        Claim claimStandardInterest = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                        .withInterest(
+                            standardInterestBuilder()
+                                .withInterestDate(SampleInterestDate.submission())
+                                .build())
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(1))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillToday(claimStandardInterest))
+            .isEqualTo(Optional.of(format(new BigDecimal("60.01"))));
     }
 
     @Test
     public void totalTillDateOfIssueShouldReturnEmptyOptionalWhenClaimHasAmountDifferentThanAmountBreakdown() {
         assertThat(TotalAmountCalculator.totalTillDateOfIssue(claimWithAmountRange())).isEqualTo(Optional.empty());
     }
+
+    @Test
+    public void shouldCalculateTotalAmountTillTodayForBreakdownInterestWithoutContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        breakdownInterestBuilder()
+                            .withInterestDate(SampleInterestDate.submissionToSubmission())
+                            .build()
+                    )
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(3))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillToday(claim))
+            .isPresent()
+            .get()
+            .isEqualTo(new BigDecimal("100.00"));
+    }
+
+    @Test
+    public void shouldCalculateTotalAmountTillTodayForBreakdownInterestWithFixedAmountContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        breakdownInterestBuilder()
+                            .withSpecificDailyAmount(new BigDecimal("10"))
+                            .withInterestDate(SampleInterestDate.submissionToSettledOrJudgement())
+                            .build()
+                    )
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(3))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillToday(claim))
+            .isPresent()
+            .get()
+            .isEqualTo(new BigDecimal("130.00"));
+    }
+
+    @Test
+    public void shouldCalculateTotalAmountTillTodayForBreakdownInterestWithRateContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        breakdownInterestBuilder()
+                            .withRate(new BigDecimal("8.00"))
+                            .withInterestDate(SampleInterestDate.submissionToSettledOrJudgement())
+                            .build()
+                    )
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(3))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillToday(claim))
+            .isPresent()
+            .get()
+            .isEqualTo(new BigDecimal("100.03"));
+    }
+
+    @Test
+    public void shouldCalculateTotalAmountTillDateOfIssueForBreakdownInterestWithoutContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        breakdownInterestBuilder()
+                           .withInterestDate(SampleInterestDate.submissionToSubmission())
+                           .build())
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(1))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillDateOfIssue(claim))
+            .isPresent()
+            .get()
+            .isEqualTo(new BigDecimal("100.00"));
+    }
+
+    @Test
+    public void shouldCalculateTotalAmountTillDateOfIssueForBreakdownInterestWithFixedAmountContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                        .withAmount(validDefaults())
+                        .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                        .withInterest(
+                            breakdownInterestBuilder()
+                                .withSpecificDailyAmount(new BigDecimal("10"))
+                                .withInterestDate(SampleInterestDate.submissionToSettledOrJudgement())
+                                .build()
+                        )
+                        .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(3))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillDateOfIssue(claim))
+            .isPresent()
+            .get()
+            .isEqualTo(new BigDecimal("100.00"));
+    }
+
+    @Test
+    public void shouldCalculateTotalAmountTillDateOfIssueForBreakdownInterestWithRateContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        breakdownInterestBuilder()
+                            .withRate(new BigDecimal("8.00"))
+                            .withInterestDate(SampleInterestDate.submissionToSettledOrJudgement())
+                            .build()
+                    )
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(3))
+            .build();
+
+        assertThat(TotalAmountCalculator.totalTillDateOfIssue(claim))
+            .isPresent()
+            .get()
+            .isEqualTo(new BigDecimal("100.00"));
+    }
+
+    @Test
+    public void totalInterestShouldBeZeroWhenClaimIssuedOnIsToday() {
+        Claim claimStandardInterest = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(standardInterestBuilder()
+                            .withInterestDate(SampleInterestDate.submission())
+                            .build())
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now())
+            .build();
+
+        assertThat(TotalAmountCalculator.calculateInterestForClaim(claimStandardInterest))
+            .isEqualTo(Optional.of(format(new BigDecimal("0.00"))));
+    }
+
+    @Test
+    public void totalInterestShouldBeZeroWhenClaimIssuedOnIsTomorrow() {
+        Claim claimStandardInterest = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(standardInterestBuilder()
+                            .withInterestDate(SampleInterestDate.submission())
+                            .build())
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().plusDays(1))
+            .build();
+
+        assertThat(TotalAmountCalculator.calculateInterestForClaim(claimStandardInterest))
+            .isEqualTo(Optional.of(format(new BigDecimal("0.00"))));
+    }
+
+    @Test
+    public void totalInterestShouldIncludeOneDayInterestWhenClaimIssuedOnIsYesterday() {
+        Claim claimStandardInterest = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        standardInterestBuilder()
+                            .withInterestDate(SampleInterestDate.submission())
+                            .build())
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(1))
+            .build();
+
+        assertThat(TotalAmountCalculator.calculateInterestForClaim(claimStandardInterest))
+            .isEqualTo(Optional.of(format(new BigDecimal("0.01"))));
+    }
+
+    @Test
+    public void shouldCalculateTotalInterestForBreakdownInterestWithFixedAmountContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        breakdownInterestBuilder()
+                            .withSpecificDailyAmount(new BigDecimal("10"))
+                            .withInterestDate(SampleInterestDate.submissionToSettledOrJudgement())
+                            .build()
+                    )
+                    .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(3))
+            .build();
+
+        assertThat(TotalAmountCalculator.calculateInterestForClaim(claim))
+            .isEqualTo(Optional.of(format(new BigDecimal("70.00"))));
+    }
+
+    @Test
+    public void shouldCalculateTotalInterestForBreakdownInterestWithRateContinuingInterest() {
+        Claim claim = SampleClaim.builder()
+            .withClaimData(
+                SampleClaimData.builder()
+                    .withAmount(validDefaults())
+                    .withFeeAmount(TWENTY_POUNDS_IN_PENNIES)
+                    .withInterest(
+                        breakdownInterestBuilder()
+                            .withRate(new BigDecimal("8.00"))
+                            .withInterestDate(SampleInterestDate.submissionToSettledOrJudgement())
+                            .build()
+                    )
+                        .build()
+            )
+            .withIssuedOn(LocalDate.now().minusDays(2))
+                .build();
+
+        assertThat(TotalAmountCalculator.calculateInterestForClaim(claim))
+                .isEqualTo(Optional.of(format(new BigDecimal("40.02"))));
+    }
+
 
     private static Claim claimWithAmountRange() {
         return SampleClaim.builder()

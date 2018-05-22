@@ -3,7 +3,6 @@ package uk.gov.hmcts.cmc.claimstore.controllers;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.cmc.claimstore.services.document.DocumentsService;
+
+import javax.validation.constraints.NotBlank;
 
 @Api
 @RestController
@@ -38,7 +39,7 @@ public class DocumentsController {
         @PathVariable("externalId") @NotBlank String externalId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
     ) {
-        byte[] pdfDocument = documentsService.generateDefendantResponseCopy(externalId, authorisation);
+        byte[] pdfDocument = documentsService.generateDefendantResponseReceipt(externalId, authorisation);
 
         return ResponseEntity
             .ok()
@@ -56,7 +57,7 @@ public class DocumentsController {
         @PathVariable("externalId") @NotBlank String externalId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
     ) {
-        byte[] pdfDocument = documentsService.getLegalSealedClaim(externalId, authorisation);
+        byte[] pdfDocument = documentsService.getSealedClaim(externalId, authorisation);
 
         return ResponseEntity
             .ok()
@@ -129,6 +130,24 @@ public class DocumentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
     ) {
         byte[] pdfDocument = documentsService.generateClaimIssueReceipt(externalId, authorisation);
+
+        return ResponseEntity
+            .ok()
+            .contentLength(pdfDocument.length)
+            .body(new ByteArrayResource(pdfDocument));
+    }
+
+    @ApiOperation("Returns a sealed claim copy for a given claim external id")
+    @GetMapping(
+        value = "/sealedClaim/{externalId}",
+        produces = MediaType.APPLICATION_PDF_VALUE
+    )
+    public ResponseEntity<ByteArrayResource> sealedClaim(
+        @ApiParam("Claim external id")
+        @PathVariable("externalId") @NotBlank String externalId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
+    ) {
+        byte[] pdfDocument = documentsService.getSealedClaim(externalId, authorisation);
 
         return ResponseEntity
             .ok()

@@ -18,7 +18,6 @@ import uk.gov.hmcts.cmc.ccd.domain.CCDInterestType;
 import uk.gov.hmcts.cmc.ccd.domain.CCDOrganisation;
 import uk.gov.hmcts.cmc.ccd.domain.CCDParty;
 import uk.gov.hmcts.cmc.ccd.domain.CCDPayment;
-import uk.gov.hmcts.cmc.ccd.domain.CCDPaymentState;
 import uk.gov.hmcts.cmc.ccd.domain.CCDPersonalInjury;
 import uk.gov.hmcts.cmc.ccd.domain.CCDRepresentative;
 import uk.gov.hmcts.cmc.ccd.domain.CCDSoleTrader;
@@ -173,7 +172,6 @@ public class SampleData {
                     .build())
             .payment(getCCDPayment())
             .interest(getCCDInterest())
-            .interestDate(getCCDInterestDate())
             .statementOfTruth(getCCDStatementOfTruth())
             .externalReferenceNumber("external ref")
             .externalId(UUID.randomUUID().toString())
@@ -198,17 +196,17 @@ public class SampleData {
             .rate(BigDecimal.valueOf(2))
             .reason("reason")
             .type(CCDInterestType.DIFFERENT)
+            .interestDate(getCCDInterestDate())
             .build();
     }
 
     public static CCDPayment getCCDPayment() {
         return CCDPayment.builder()
             .id("paymentId")
-            .description("description")
             .reference("reference")
             .amount(BigDecimal.valueOf(7000))
             .dateCreated("2017-10-12")
-            .paymentState(CCDPaymentState.builder().status("Success").finished("YES").build())
+            .status("Success")
             .build();
     }
 

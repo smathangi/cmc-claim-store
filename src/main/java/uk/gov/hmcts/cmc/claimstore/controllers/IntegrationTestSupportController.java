@@ -29,11 +29,16 @@ public class IntegrationTestSupportController {
         this.supportRepository = supportRepository;
     }
 
+    @GetMapping("/trigger-server-error")
+    public void throwAnError() {
+        throw new IllegalStateException("Something really bad happened!");
+    }
+
     @GetMapping("/claims/{claimReferenceNumber}")
     @ApiOperation("Fetch user claim for given reference number")
     public Claim getByClaimReferenceNumber(
         @PathVariable("claimReferenceNumber") String claimReferenceNumber,
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authorisation
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorisation
     ) {
         return getClaim(claimReferenceNumber, authorisation);
     }
@@ -43,7 +48,7 @@ public class IntegrationTestSupportController {
     public Claim updateRespondByDate(
         @PathVariable("claimReferenceNumber") String claimReferenceNumber,
         @PathVariable("newDeadline") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate newDeadline,
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authorisation
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorisation
     ) {
         Claim claim = getClaim(claimReferenceNumber, authorisation);
 

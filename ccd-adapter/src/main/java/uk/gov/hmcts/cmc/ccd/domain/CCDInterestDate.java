@@ -11,4 +11,5 @@ public class CCDInterestDate {
     private CCDInterestDateType type;
     private LocalDate date;
     private String reason;
+    private CCDInterestEndDateType endDateType;
 }

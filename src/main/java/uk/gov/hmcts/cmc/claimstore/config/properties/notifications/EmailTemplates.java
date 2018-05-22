@@ -1,9 +1,12 @@
 package uk.gov.hmcts.cmc.claimstore.config.properties.notifications;
 
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
 
 @Component
+@Validated
 public class EmailTemplates {
 
     @NotEmpty
@@ -53,6 +56,12 @@ public class EmailTemplates {
 
     @NotEmpty
     private String offerRejectedByClaimantEmailToDefendant;
+
+    @NotEmpty
+    private String offerCounterSignedEmailToOriginator;
+
+    @NotEmpty
+    private String offerCounterSignedEmailToOtherParty;
 
     public String getClaimantMoreTimeRequested() {
         return claimantMoreTimeRequested;
@@ -180,5 +189,21 @@ public class EmailTemplates {
 
     public void setOfferRejectedByClaimantEmailToDefendant(String offerRejectedByClaimantEmailToDefendant) {
         this.offerRejectedByClaimantEmailToDefendant = offerRejectedByClaimantEmailToDefendant;
+    }
+
+    public String getOfferCounterSignedEmailToOriginator() {
+        return offerCounterSignedEmailToOriginator;
+    }
+
+    public void setOfferCounterSignedEmailToOriginator(String offerCounterSignedEmailToOriginator) {
+        this.offerCounterSignedEmailToOriginator = offerCounterSignedEmailToOriginator;
+    }
+
+    public String getOfferCounterSignedEmailToOtherParty() {
+        return offerCounterSignedEmailToOtherParty;
+    }
+
+    public void setOfferCounterSignedEmailToOtherParty(String offerCounterSignedEmailToOtherParty) {
+        this.offerCounterSignedEmailToOtherParty = offerCounterSignedEmailToOtherParty;
     }
 }

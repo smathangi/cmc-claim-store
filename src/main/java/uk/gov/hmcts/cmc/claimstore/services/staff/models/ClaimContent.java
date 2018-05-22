@@ -1,5 +1,11 @@
 package uk.gov.hmcts.cmc.claimstore.services.staff.models;
 
+import uk.gov.hmcts.cmc.claimstore.documents.content.models.EvidenceContent;
+import uk.gov.hmcts.cmc.claimstore.services.staff.content.AmountRowContent;
+import uk.gov.hmcts.cmc.domain.models.TimelineEvent;
+
+import java.util.List;
+
 public class ClaimContent {
 
     private final String referenceNumber;
@@ -12,6 +18,9 @@ public class ClaimContent {
     private final String claimTotalAmount;
     private final String signerName;
     private final String signerRole;
+    private final List<TimelineEvent> events;
+    private final List<EvidenceContent> evidences;
+    private final List<AmountRowContent> amountBreakdown;
 
     @SuppressWarnings("squid:S00107") // Suppressed due to MVP timelines, require more time to investigate and fix
     public ClaimContent(
@@ -24,7 +33,11 @@ public class ClaimContent {
         InterestContent interest,
         String claimTotalAmount,
         String signerName,
-        String signerRole) {
+        String signerRole,
+        List<TimelineEvent> events,
+        List<EvidenceContent> evidences,
+        List<AmountRowContent> amountBreakdown
+    ) {
         this.referenceNumber = referenceNumber;
         this.submittedOn = submittedOn;
         this.issuedOn = issuedOn;
@@ -35,6 +48,9 @@ public class ClaimContent {
         this.claimTotalAmount = claimTotalAmount;
         this.signerName = signerName;
         this.signerRole = signerRole;
+        this.events = events;
+        this.evidences = evidences;
+        this.amountBreakdown = amountBreakdown;
     }
 
     public String getReferenceNumber() {
@@ -77,4 +93,15 @@ public class ClaimContent {
         return signerRole;
     }
 
+    public List<TimelineEvent> getEvents() {
+        return events;
+    }
+
+    public List<EvidenceContent> getEvidences() {
+        return evidences;
+    }
+
+    public List<AmountRowContent> getAmountBreakdown() {
+        return amountBreakdown;
+    }
 }

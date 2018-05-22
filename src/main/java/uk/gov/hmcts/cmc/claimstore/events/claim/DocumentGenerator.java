@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.cmc.claimstore.documents.CitizenSealedClaimPdfService;
-import uk.gov.hmcts.cmc.claimstore.documents.DefendantPinLetterPdfService;
-import uk.gov.hmcts.cmc.claimstore.documents.LegalSealedClaimPdfService;
+import uk.gov.hmcts.cmc.claimstore.documents.CitizenServiceDocumentsService;
+import uk.gov.hmcts.cmc.claimstore.documents.SealedClaimPdfService;
 import uk.gov.hmcts.cmc.claimstore.documents.output.PDF;
 import uk.gov.hmcts.cmc.claimstore.events.DocumentGeneratedEvent;
+import uk.gov.hmcts.cmc.claimstore.events.DocumentReadyToPrintEvent;
 import uk.gov.hmcts.cmc.claimstore.events.solicitor.RepresentedClaimIssuedEvent;
+import uk.gov.hmcts.reform.pdf.service.client.PDFServiceClient;
+import uk.gov.hmcts.reform.sendletter.api.Document;
 
 import static uk.gov.hmcts.cmc.claimstore.utils.DocumentNameUtils.buildDefendantLetterFileBaseName;
 import static uk.gov.hmcts.cmc.claimstore.utils.DocumentNameUtils.buildSealedClaimFileBaseName;
@@ -17,32 +19,39 @@ import static uk.gov.hmcts.cmc.claimstore.utils.DocumentNameUtils.buildSealedCla
 @Component
 public class DocumentGenerator {
 
-    private final CitizenSealedClaimPdfService citizenSealedClaimPdfService;
-    private final DefendantPinLetterPdfService defendantPinLetterPdfService;
-    private final LegalSealedClaimPdfService legalSealedClaimPdfService;
+    private final CitizenServiceDocumentsService citizenServiceDocumentsService;
+    private final SealedClaimPdfService sealedClaimPdfService;
     private final ApplicationEventPublisher publisher;
+    private final PDFServiceClient pdfServiceClient;
 
     @Autowired
     public DocumentGenerator(
-        CitizenSealedClaimPdfService citizenSealedClaimPdfService,
-        DefendantPinLetterPdfService defendantPinLetterPdfService,
-        LegalSealedClaimPdfService legalSealedClaimPdfService,
-        ApplicationEventPublisher publisher
+        CitizenServiceDocumentsService citizenServiceDocumentsService,
+        SealedClaimPdfService sealedClaimPdfService,
+        ApplicationEventPublisher publisher,
+        PDFServiceClient pdfServiceClient
     ) {
-        this.citizenSealedClaimPdfService = citizenSealedClaimPdfService;
-        this.defendantPinLetterPdfService = defendantPinLetterPdfService;
-        this.legalSealedClaimPdfService = legalSealedClaimPdfService;
+        this.citizenServiceDocumentsService = citizenServiceDocumentsService;
+        this.sealedClaimPdfService = sealedClaimPdfService;
         this.publisher = publisher;
+        this.pdfServiceClient = pdfServiceClient;
     }
 
     @EventListener
     public void generateForNonRepresentedClaim(CitizenClaimIssuedEvent event) {
-        PDF sealedClaim = new PDF(buildSealedClaimFileBaseName(event.getClaim().getReferenceNumber()),
-            citizenSealedClaimPdfService.createPdf(event.getClaim()));
-        PDF defendantLetter = new PDF(buildDefendantLetterFileBaseName(event.getClaim().getReferenceNumber()),
-            defendantPinLetterPdfService.createPdf(event.getClaim(), event.getPin()
-                .orElseThrow(() -> new IllegalArgumentException("Defendant access PIN is missing"))));
+        Document sealedClaimDoc = citizenServiceDocumentsService.sealedClaimDocument(event.getClaim());
 
+        PDF sealedClaim = new PDF(buildSealedClaimFileBaseName(event.getClaim().getReferenceNumber()),
+            sealedClaimPdfService.createPdf(event.getClaim()));
+
+        Document defendantLetterDoc = citizenServiceDocumentsService.pinLetterDocument(event.getClaim(),
+            event.getPin());
+
+        PDF defendantLetter = new PDF(buildDefendantLetterFileBaseName(event.getClaim().getReferenceNumber()),
+            pdfServiceClient.generateFromHtml(defendantLetterDoc.template.getBytes(), defendantLetterDoc.values));
+
+        publisher.publishEvent(new DocumentReadyToPrintEvent(event.getClaim(),
+            defendantLetterDoc, sealedClaimDoc));
         publisher.publishEvent(new DocumentGeneratedEvent(event.getClaim(), event.getAuthorisation(),
             sealedClaim, defendantLetter));
     }
@@ -50,7 +59,7 @@ public class DocumentGenerator {
     @EventListener
     public void generateForRepresentedClaim(RepresentedClaimIssuedEvent event) {
         PDF sealedClaim = new PDF(buildSealedClaimFileBaseName(event.getClaim().getReferenceNumber()),
-            legalSealedClaimPdfService.createPdf(event.getClaim()));
+            sealedClaimPdfService.createPdf(event.getClaim()));
 
         publisher.publishEvent(new DocumentGeneratedEvent(event.getClaim(), event.getAuthorisation(), sealedClaim));
     }

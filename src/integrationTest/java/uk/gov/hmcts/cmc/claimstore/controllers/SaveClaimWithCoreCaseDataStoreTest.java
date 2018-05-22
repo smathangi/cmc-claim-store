@@ -15,7 +15,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -42,7 +42,7 @@ public class SaveClaimWithCoreCaseDataStoreTest extends BaseSaveTest {
             eq(USER_ID),
             eq(JURISDICTION_ID),
             eq(CASE_TYPE_ID),
-            eq(ImmutableMap.of("case.externalId", claimData.getExternalId()))
+            eq(ImmutableMap.of("case.externalId", claimData.getExternalId().toString()))
             )
         ).willReturn(Collections.emptyList());
 
@@ -108,7 +108,7 @@ public class SaveClaimWithCoreCaseDataStoreTest extends BaseSaveTest {
             eq(USER_ID),
             eq(JURISDICTION_ID),
             eq(CASE_TYPE_ID),
-            eq(ImmutableMap.of("case.externalId", claimData.getExternalId()))
+            eq(ImmutableMap.of("case.externalId", claimData.getExternalId().toString()))
             )
         ).willReturn(Collections.emptyList());
 
@@ -176,7 +176,7 @@ public class SaveClaimWithCoreCaseDataStoreTest extends BaseSaveTest {
             eq(USER_ID),
             eq(JURISDICTION_ID),
             eq(CASE_TYPE_ID),
-            eq(ImmutableMap.of("case.externalId", claimData.getExternalId()))
+            eq(ImmutableMap.of("case.externalId", claimData.getExternalId().toString()))
             )
         ).willReturn(Collections.emptyList());
 
@@ -211,7 +211,7 @@ public class SaveClaimWithCoreCaseDataStoreTest extends BaseSaveTest {
             eq(USER_ID),
             eq(JURISDICTION_ID),
             eq(CASE_TYPE_ID),
-            eq(ImmutableMap.of("case.externalId", claimData.getExternalId()))
+            eq(ImmutableMap.of("case.externalId", claimData.getExternalId().toString()))
             )
         ).willReturn(Collections.emptyList());
 
@@ -257,11 +257,11 @@ public class SaveClaimWithCoreCaseDataStoreTest extends BaseSaveTest {
             eq(USER_ID),
             eq(JURISDICTION_ID),
             eq(CASE_TYPE_ID),
-            eq(ImmutableMap.of("case.externalId", claimData.getExternalId()))
+            eq(ImmutableMap.of("case.externalId", claimData.getExternalId().toString()))
             )
         ).willReturn(Collections.emptyList());
 
-        given(serviceAuthorisationApi.serviceToken(anyString(), anyString())).willThrow(FeignException.class);
+        given(serviceAuthorisationApi.serviceToken(anyMap())).willThrow(FeignException.class);
 
         MvcResult result = makeRequest(claimData)
             .andExpect(status().isOk())

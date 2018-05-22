@@ -2,9 +2,10 @@ package uk.gov.hmcts.cmc.domain.models.sampledata;
 
 import uk.gov.hmcts.cmc.domain.models.ClaimData;
 import uk.gov.hmcts.cmc.domain.models.Interest;
-import uk.gov.hmcts.cmc.domain.models.InterestDate;
 import uk.gov.hmcts.cmc.domain.models.Payment;
+import uk.gov.hmcts.cmc.domain.models.Timeline;
 import uk.gov.hmcts.cmc.domain.models.amount.Amount;
+import uk.gov.hmcts.cmc.domain.models.evidence.Evidence;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
 import uk.gov.hmcts.cmc.domain.models.otherparty.TheirDetails;
 import uk.gov.hmcts.cmc.domain.models.particulars.DamagesExpectation;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
+import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest.noInterestBuilder;
 
 public class SampleClaimData {
 
@@ -27,7 +29,6 @@ public class SampleClaimData {
     private Payment payment = SamplePayment.validDefaults();
     private Amount amount = SampleAmountBreakdown.validDefaults();
     private Interest interest = SampleInterest.standard();
-    private InterestDate interestDate = SampleInterestDate.validDefaults();
     private String reason = "reason";
     private BigInteger feeAmount = new BigInteger("4000");
     private String feeAccountNumber = "PBA1234567";
@@ -36,6 +37,8 @@ public class SampleClaimData {
     private String externalReferenceNumber = "CLAIM234324";
     private String preferredCourt = "LONDON COUNTY COUNCIL";
     private String feeCode = "X0012";
+    private Timeline timeline = SampleTimeline.validDefaults();
+    private Evidence evidence = SampleEvidence.validDefaults();
 
     private HousingDisrepair housingDisrepair = new HousingDisrepair(
         DamagesExpectation.MORE_THAN_THOUSAND_POUNDS,
@@ -106,6 +109,11 @@ public class SampleClaimData {
         return this;
     }
 
+    public SampleClaimData withPayment(Payment payment) {
+        this.payment = payment;
+        return this;
+    }
+
     public SampleClaimData withDefendant(TheirDetails defendant) {
         this.defendants = singletonList(defendant);
         return this;
@@ -118,11 +126,6 @@ public class SampleClaimData {
 
     public SampleClaimData withInterest(Interest interest) {
         this.interest = interest;
-        return this;
-    }
-
-    public SampleClaimData withInterestDate(InterestDate interestDate) {
-        this.interestDate = interestDate;
         return this;
     }
 
@@ -156,6 +159,16 @@ public class SampleClaimData {
         return this;
     }
 
+    public SampleClaimData withTimeline(Timeline timeline) {
+        this.timeline = timeline;
+        return this;
+    }
+
+    public SampleClaimData withEvidence(Evidence evidence) {
+        this.evidence = evidence;
+        return this;
+    }
+
     public ClaimData build() {
         return new ClaimData(
             externalId,
@@ -165,7 +178,6 @@ public class SampleClaimData {
             amount,
             feeAmount,
             interest,
-            interestDate,
             personalInjury,
             housingDisrepair,
             reason,
@@ -173,7 +185,9 @@ public class SampleClaimData {
             feeAccountNumber,
             externalReferenceNumber,
             preferredCourt,
-            feeCode);
+            feeCode,
+            timeline,
+            evidence);
     }
 
     public static ClaimData validDefaults() {
@@ -196,7 +210,9 @@ public class SampleClaimData {
                 .individual())
             .withDefendant(SampleTheirDetails.builder()
                 .withRepresentative(null)
-                .individualDetails());
+                .individualDetails())
+            .withTimeline(SampleTimeline.validDefaults())
+            .withEvidence(SampleEvidence.validDefaults());
     }
 
     public static ClaimData submittedByLegalRepresentative() {
@@ -210,12 +226,14 @@ public class SampleClaimData {
 
     public static ClaimData noInterest() {
         return builder()
-            .withInterest(SampleInterest.noInterest())
-            .withInterestDate(SampleInterestDate.builder()
-                .withType(null)
-                .withDate(null)
-                .withReason(null)
-                .build())
+            .withInterest(
+                noInterestBuilder()
+                    .withInterestDate(SampleInterestDate.builder()
+                            .withType(null)
+                            .withDate(null)
+                            .withReason(null)
+                            .build())
+                    .build())
             .withAmount(SampleAmountBreakdown.validDefaults())
             .build();
     }

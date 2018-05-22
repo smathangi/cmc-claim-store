@@ -5,26 +5,39 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.cmc.ccd.domain.CCDYesNoOption;
 import uk.gov.hmcts.cmc.ccd.domain.response.CCDDefenceType;
 import uk.gov.hmcts.cmc.ccd.domain.response.CCDResponse;
+import uk.gov.hmcts.cmc.ccd.mapper.DefendantEvidenceMapper;
 import uk.gov.hmcts.cmc.ccd.mapper.Mapper;
 import uk.gov.hmcts.cmc.ccd.mapper.PartyMapper;
+import uk.gov.hmcts.cmc.ccd.mapper.PaymentDeclarationMapper;
 import uk.gov.hmcts.cmc.ccd.mapper.StatementOfTruthMapper;
-import uk.gov.hmcts.cmc.domain.models.FullDefenceResponse;
-import uk.gov.hmcts.cmc.domain.models.Response;
 import uk.gov.hmcts.cmc.domain.models.legalrep.StatementOfTruth;
+import uk.gov.hmcts.cmc.domain.models.response.DefenceType;
+import uk.gov.hmcts.cmc.domain.models.response.FullDefenceResponse;
+import uk.gov.hmcts.cmc.domain.models.response.YesNoOption;
 
 @Component
 public class ResponseMapper implements Mapper<CCDResponse, FullDefenceResponse> {
 
     private final StatementOfTruthMapper statementOfTruthMapper;
     private final PartyMapper partyMapper;
+    private final PaymentDeclarationMapper paymentDeclarationMapper;
+    private final DefendantTimelineMapper timelineMapper;
+    private final DefendantEvidenceMapper evidenceMapper;
 
     @Autowired
     public ResponseMapper(
         StatementOfTruthMapper statementOfTruthMapper,
-        PartyMapper partyMapper) {
+        PartyMapper partyMapper,
+        PaymentDeclarationMapper paymentDeclarationMapper,
+        DefendantTimelineMapper timelineMapper,
+        DefendantEvidenceMapper evidenceMapper
+    ) {
 
         this.statementOfTruthMapper = statementOfTruthMapper;
         this.partyMapper = partyMapper;
+        this.paymentDeclarationMapper = paymentDeclarationMapper;
+        this.timelineMapper = timelineMapper;
+        this.evidenceMapper = evidenceMapper;
     }
 
     @Override
@@ -34,24 +47,36 @@ public class ResponseMapper implements Mapper<CCDResponse, FullDefenceResponse> 
         response.getFreeMediation()
             .ifPresent(freeMediation -> builder.freeMediationOption(CCDYesNoOption.valueOf(freeMediation.name())));
 
-        builder.moreTimeNeededOption(CCDYesNoOption.valueOf(response.getMoreTimeNeeded().name()));
+        if (response.getMoreTimeNeeded() == null) {
+            builder.moreTimeNeededOption(CCDYesNoOption.valueOf(YesNoOption.NO.name()));
+        } else {
+            builder.moreTimeNeededOption(CCDYesNoOption.valueOf(response.getMoreTimeNeeded().name()));
+        }
+
         builder.defendant(partyMapper.to(response.getDefendant()));
 
         response.getStatementOfTruth()
             .ifPresent(statementOfTruth -> builder.statementOfTruth(statementOfTruthMapper.to(statementOfTruth)));
 
         builder.responseType(CCDDefenceType.valueOf(response.getDefenceType().name()));
-        builder.defence(response.getDefence());
+        response.getDefence().ifPresent(builder::defence);
+
+        response.getPaymentDeclaration().ifPresent(paymentDeclaration ->
+            builder.paymentDeclaration(paymentDeclarationMapper.to(paymentDeclaration)));
+
+        response.getTimeline().ifPresent(timeline -> builder.timeline(timelineMapper.to(timeline)));
+
+        response.getEvidence().ifPresent(evidence -> builder.evidence(evidenceMapper.to(evidence)));
 
         return builder.build();
     }
 
     @Override
     public FullDefenceResponse from(CCDResponse response) {
-        Response.FreeMediationOption freeMediation = null;
+        YesNoOption freeMediation = null;
 
         if (response.getFreeMediationOption() != null) {
-            freeMediation = Response.FreeMediationOption.valueOf(response.getFreeMediationOption().name());
+            freeMediation = YesNoOption.valueOf(response.getFreeMediationOption().name());
         }
 
         StatementOfTruth statementOfTruth = null;
@@ -62,11 +87,14 @@ public class ResponseMapper implements Mapper<CCDResponse, FullDefenceResponse> 
 
         return new FullDefenceResponse(
             freeMediation,
-            Response.MoreTimeNeededOption.valueOf(response.getMoreTimeNeededOption().name()),
+            YesNoOption.valueOf(response.getMoreTimeNeededOption().name()),
             partyMapper.from(response.getDefendant()),
             statementOfTruth,
-            FullDefenceResponse.DefenceType.valueOf(response.getResponseType().name()),
-            response.getDefence()
+            DefenceType.valueOf(response.getResponseType().name()),
+            response.getDefence(),
+            paymentDeclarationMapper.from(response.getPaymentDeclaration()),
+            timelineMapper.from(response.getTimeline()),
+            evidenceMapper.from(response.getEvidence())
         );
     }
 }

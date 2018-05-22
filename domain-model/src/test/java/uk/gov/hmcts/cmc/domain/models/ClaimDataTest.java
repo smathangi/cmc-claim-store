@@ -1,5 +1,6 @@
 package uk.gov.hmcts.cmc.domain.models;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleClaimData;
 import uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest;
@@ -11,10 +12,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.cmc.domain.BeanValidator.validate;
 import static uk.gov.hmcts.cmc.domain.models.Interest.InterestType.DIFFERENT;
-import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest.noInterest;
-import static uk.gov.hmcts.cmc.domain.utils.BeanValidator.validate;
+import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest.noInterestBuilder;
+import static uk.gov.hmcts.cmc.domain.models.sampledata.SampleInterest.standardInterestBuilder;
 
 public class ClaimDataTest {
 
@@ -35,11 +38,14 @@ public class ClaimDataTest {
     }
 
     @Test
+    @Ignore // To be enabled after new validators are implemented
     public void shouldBeInvalidWhenGivenStandardInterestWithInvalidDate() {
         //given
         ClaimData claimData = SampleClaimData.builder()
-            .withInterest(SampleInterest.standard())
-            .withInterestDate(invalidDate)
+            .withInterest(
+                standardInterestBuilder()
+                    .withInterestDate(invalidDate)
+                    .build())
             .build();
         //when
         Set<String> response = validate(claimData);
@@ -50,14 +56,16 @@ public class ClaimDataTest {
     }
 
     @Test
+    @Ignore // To be enabled after new validators are implemented
     public void shouldBeInvalidWhenGivenCustomInterestWithInvalidDate() {
         //given
         ClaimData claimData = SampleClaimData.builder()
-            .withInterest(SampleInterest.builder()
-                .withType(DIFFERENT)
-                .build())
-            .withInterestDate(invalidDate)
-            .build();
+            .withInterest(
+                SampleInterest.builder()
+                    .withType(DIFFERENT)
+                    .withInterestDate(invalidDate)
+                    .build())
+                .build();
         //when
         Set<String> response = validate(claimData);
         //then
@@ -69,9 +77,11 @@ public class ClaimDataTest {
     @Test
     public void shouldBeValidWhenGivenNoInterestWithInvalidInterestDate() {
         ClaimData claimData = SampleClaimData.builder()
-            .withInterest(noInterest())
-            .withInterestDate(invalidDate)
-            .build();
+            .withInterest(
+                noInterestBuilder()
+                    .withInterestDate(invalidDate)
+                    .build())
+                .build();
 
         Set<String> errors = validate(claimData);
 
@@ -108,7 +118,7 @@ public class ClaimDataTest {
 
         Set<String> errors = validate(claimData);
 
-        assertThat(errors).containsOnly("defendants[0] : may not be null");
+        assertThat(errors).containsOnly("defendants : each element must be not null");
     }
 
     @Test
@@ -195,7 +205,7 @@ public class ClaimDataTest {
 
         Set<String> errors = validate(claimData);
 
-        assertThat(errors).containsOnly("claimants[0] : may not be null");
+        assertThat(errors).containsOnly("claimants : each element must be not null");
     }
 
     @Test
@@ -269,5 +279,18 @@ public class ClaimDataTest {
     public void shouldConvertFeesToPound() {
         ClaimData claimData = SampleClaimData.builder().withFeeAmount(BigInteger.valueOf(456712)).build();
         assertThat(claimData.getFeesPaidInPound()).isEqualTo(new BigDecimal("4567.12"));
+    }
+
+    @Test
+    public void shouldBeInvalidWhenGivenTooManyTimeLineEvents() {
+        ClaimData claimData = SampleClaimData.builder()
+            .withTimeline(new Timeline(asList(new TimelineEvent[1001])))
+            .build();
+
+        Set<String> errors = validate(claimData);
+
+        assertThat(errors)
+            .hasSize(1)
+            .containsOnly("timeline.events : size must be between 1 and 1000");
     }
 }

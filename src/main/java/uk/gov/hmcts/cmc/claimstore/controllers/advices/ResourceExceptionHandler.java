@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.cmc.claimstore.exceptions.ConflictException;
+import uk.gov.hmcts.cmc.claimstore.exceptions.DefendantLinkingException;
 import uk.gov.hmcts.cmc.claimstore.exceptions.ForbiddenActionException;
 import uk.gov.hmcts.cmc.claimstore.exceptions.InvalidApplicationException;
 import uk.gov.hmcts.cmc.claimstore.exceptions.NotFoundException;
@@ -73,6 +74,12 @@ public class ResourceExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), new HttpHeaders(), HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(value = DefendantLinkingException.class)
+    public ResponseEntity<Object> defendantNotLinkedWithClaim(Exception exception) {
+        logger.error(exception.getMessage(), exception);
+        return new ResponseEntity<>(exception.getMessage(), new HttpHeaders(), HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<Object> notFoundClaim(Exception exception) {
         logger.debug(exception.getMessage(), exception);
@@ -93,11 +100,16 @@ public class ResourceExceptionHandler {
 
     @ExceptionHandler(value = {
         HttpMediaTypeNotSupportedException.class,
-        InvalidApplicationException.class,
         ServletRequestBindingException.class})
     public ResponseEntity<Object> badRequest(Exception exception) {
         logger.trace(exception.getMessage(), exception);
         return new ResponseEntity<>(exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = InvalidApplicationException.class)
+    public ResponseEntity<Object> invalidApplicationException(InvalidApplicationException exception) {
+        logger.error(exception.getMessage(), exception);
+        return new ResponseEntity<>(exception.getMessage(), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
